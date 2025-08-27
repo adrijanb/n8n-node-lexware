@@ -54,4 +54,15 @@ export const voucherListsFields: INodeProperties[] = [
     default: "",
     description: "Optional status filter",
   },
+  {
+    displayName: "Voucher Number",
+    name: "voucherNumber",
+    type: "string",
+    displayOptions: {
+      show: { resource: ["voucherLists"], operation: ["getAll"] },
+    },
+    default: "",
+    description:
+      "Filter by voucherNumber (according to docs, filtering vouchers by number should be done via voucherlist)",
+  },
 ];

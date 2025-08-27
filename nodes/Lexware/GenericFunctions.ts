@@ -7,6 +7,49 @@ import {
   JsonObject,
 } from "n8n-workflow";
 
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function httpRequestWithBackoff(
+  this: IExecuteFunctions,
+  options: IHttpRequestOptions,
+  maxRetries = 5,
+  baseDelayMs = 500,
+  maxDelayMs = 10000
+) {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await this.helpers.httpRequest(options);
+    } catch (error) {
+      const err = error as unknown as {
+        response?: {
+          statusCode?: number;
+          headers?: Record<string, any>;
+          body?: any;
+          data?: any;
+        };
+      };
+      const status = err?.response?.statusCode;
+      if (status === 429 && attempt < maxRetries) {
+        // Honor Retry-After header if present
+        const retryAfterHeader = err?.response?.headers?.["retry-after"];
+        let delay = Number(retryAfterHeader) * 1000;
+        if (!delay || Number.isNaN(delay)) {
+          const exp = Math.min(baseDelayMs * 2 ** attempt, maxDelayMs);
+          // jitter ±20%
+          delay = Math.floor(exp * (1 + Math.random() * 0.2));
+        }
+        await sleep(delay);
+        attempt += 1;
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
 export async function lexwareApiRequest(
   this: IExecuteFunctions,
   method: string,
@@ -47,7 +90,7 @@ export async function lexwareApiRequest(
   } as IHttpRequestOptions;
 
   try {
-    return await this.helpers.httpRequest(options);
+    return await httpRequestWithBackoff.call(this, options);
   } catch (error) {
     // Versuche, die Fehlermeldung der Lexware-API aussagekräftig zu extrahieren
     const err = error as unknown as {
@@ -123,7 +166,7 @@ export async function lexwareApiUpload(
     ...optionOverrides,
   } as IHttpRequestOptions;
 
-  return this.helpers.httpRequest(options);
+  return httpRequestWithBackoff.call(this, options);
 }
 
 // Download binary file, returns full response to access headers
@@ -145,7 +188,7 @@ export async function lexwareApiDownload(
     ...optionOverrides,
   } as IHttpRequestOptions;
 
-  return this.helpers.httpRequest(options);
+  return httpRequestWithBackoff.call(this, options);
 }
 
 // Paginierte Abfrage nach Lexware-Schema (content/last/size/number)

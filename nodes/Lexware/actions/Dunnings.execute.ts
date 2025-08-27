@@ -36,7 +36,11 @@ export async function executeDunnings(
       );
 
       const baseLineItems = (baseInvoice?.lineItems ?? []) as IDataObject[];
-      const baseAddress = baseInvoice?.address as IDataObject;
+      const baseAddress = (baseInvoice?.address ?? {}) as IDataObject;
+      const baseShipping = (baseInvoice?.shippingConditions ??
+        {}) as IDataObject;
+      const baseTaxConditions = (baseInvoice?.taxConditions ??
+        {}) as IDataObject;
       const baseCurrency = (baseInvoice?.totalPrice?.currency || "EUR") as
         | string
         | undefined;
@@ -62,7 +66,12 @@ export async function executeDunnings(
           currency: baseCurrency || "EUR",
           totalNetAmount,
         },
-        taxConditions: { taxType: "net" },
+        taxConditions:
+          Object.keys(baseTaxConditions).length > 0
+            ? baseTaxConditions
+            : ({ taxType: "net" } as IDataObject),
+        shippingConditions:
+          Object.keys(baseShipping).length > 0 ? baseShipping : undefined,
       };
 
       const qs: IDataObject = { precedingSalesVoucherId };
