@@ -1,0 +1,75 @@
+{
+  "name": "Lexware Articles Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "articles",
+        "operation": "getAll",
+        "page": 0,
+        "type": "PRODUCT"
+      },
+      "id": "lexware-get-articles",
+      "name": "Get Articles",
+      "type": "lexware",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "credentials": {
+        "lexwareApi": {
+          "id": "your-credentials-id",
+          "name": "Lexware API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "articles",
+        "operation": "create",
+        "article": {
+          "value": {
+            "title": "Lexware buchhaltung Premium 2024",
+            "description": "Subscription product",
+            "type": "PRODUCT",
+            "articleNumber": "LXW-BUHA-2024-001",
+            "gtin": "9783648170632",
+            "unitName": "Download-Code",
+            "price": {
+              "value": {
+                "netPrice": 61.9,
+                "grossPrice": 73.66,
+                "leadingPrice": "NET",
+                "taxRate": 19
+              }
+            }
+          }
+        }
+      },
+      "id": "lexware-create-article",
+      "name": "Create Article",
+      "type": "lexware",
+      "typeVersion": 1,
+      "position": [240, 500],
+      "credentials": {
+        "lexwareApi": {
+          "id": "your-credentials-id",
+          "name": "Lexware API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Get Articles": {
+      "main": [
+        [
+          {
+            "node": "Create Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}
