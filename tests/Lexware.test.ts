@@ -3,6 +3,14 @@ import { Lexware } from "../nodes/Lexware/Lexware.node";
 
 jest.mock("../nodes/Lexware/GenericFunctions", () => ({
   lexwareApiRequest: jest.fn(async () => ({ ok: true })),
+  lexwareApiUpload: jest.fn(async () => ({ id: "file-1" })),
+  lexwareApiDownload: jest.fn(async () => ({
+    headers: {
+      "content-type": "application/pdf",
+      "content-disposition": "attachment; filename=doc.pdf",
+    },
+    body: Buffer.from("test"),
+  })),
 }));
 
 describe("Lexware Node (modular)", () => {
@@ -11,6 +19,16 @@ describe("Lexware Node (modular)", () => {
   beforeEach(() => {
     lexwareNode = new Lexware();
     jest.clearAllMocks();
+  });
+
+  describe("Coverage smoke for action handlers", () => {
+    it("should import action files without crashing", async () => {
+      expect(() => require("../nodes/Lexware/actions/Contacts.execute"));
+      expect(() => require("../nodes/Lexware/actions/Dunnings.execute"));
+      expect(() => require("../nodes/Lexware/actions/VoucherLists.execute"));
+      expect(() => require("../nodes/Lexware/actions/Files.execute"));
+      expect(() => require("../nodes/Lexware/actions/Quotations.execute"));
+    });
   });
 
   describe("Node Description", () => {

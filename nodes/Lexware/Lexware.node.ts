@@ -59,6 +59,8 @@ import {
   countriesOperations,
 } from "./descriptions/CountriesDescription";
 import { executeCountries } from "./actions/Countries.execute";
+import { filesFields, filesOperations } from "./descriptions/FilesDescription";
+import { executeFiles } from "./actions/Files.execute";
 
 export class Lexware implements INodeType {
   description: INodeTypeDescription = {
@@ -97,6 +99,7 @@ export class Lexware implements INodeType {
           { name: "Vouchers", value: "vouchers" },
           { name: "Print Layouts", value: "printLayouts" },
           { name: "Countries", value: "countries" },
+          { name: "Files", value: "files" },
         ],
         default: "articles",
       },
@@ -120,6 +123,8 @@ export class Lexware implements INodeType {
       ...printLayoutsFields,
       countriesOperations,
       ...countriesFields,
+      filesOperations,
+      ...filesFields,
     ],
   };
 
@@ -168,6 +173,9 @@ export class Lexware implements INodeType {
           break;
         case "countries":
           returnData.push(...(await executeCountries.call(this, i, operation)));
+          break;
+        case "files":
+          returnData.push(...(await executeFiles.call(this, i, operation)));
           break;
         default:
           throw new Error(`Unsupported resource: ${resource}`);
