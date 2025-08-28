@@ -20,7 +20,7 @@ function buildInvoiceBody(
   const contactId = (getParam("contactId", i, "") as string) || "";
 
   const rawItems = (getParam("lineItems.item", i, []) as IDataObject[]) || [];
-  const lineItems = rawItems.map((it) => {
+  const lineItems = Array.isArray(rawItems) ? rawItems.map((it) => {
     const unit = (it.unitPrice as IDataObject)?.value as
       | IDataObject
       | undefined;
@@ -49,7 +49,7 @@ function buildInvoiceBody(
       cleaned.lineItemAmount = it.lineItemAmount;
     }
     return cleaned;
-  });
+  }) : [];
 
   const body: IDataObject = {
     title,

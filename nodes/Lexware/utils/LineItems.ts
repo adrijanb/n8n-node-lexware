@@ -4,7 +4,7 @@ export function parseLineItemsFromCollection(
   rawItems: IDataObject[] = []
 ): IDataObject[] {
   return (rawItems || []).map((it) => {
-    const unitPriceValue = (it.unitPrice as IDataObject)?.value as
+    const unitPriceValue = (it?.unitPrice as IDataObject)?.value as
       | IDataObject
       | undefined;
     const unitPrice = unitPriceValue
@@ -17,14 +17,14 @@ export function parseLineItemsFromCollection(
       : undefined;
 
     return {
-      type: it.type || "custom",
-      name: it.name,
-      description: it.description,
-      quantity: it.quantity,
-      unitName: it.unitName,
+      type: it?.type || "custom",
+      name: it?.name,
+      description: it?.description,
+      quantity: it?.quantity,
+      unitName: it?.unitName,
       unitPrice,
-      discountPercentage: it.discountPercentage,
-      lineItemAmount: it.lineItemAmount,
+      discountPercentage: it?.discountPercentage,
+      lineItemAmount: it?.lineItemAmount,
     } as IDataObject;
   });
 }
