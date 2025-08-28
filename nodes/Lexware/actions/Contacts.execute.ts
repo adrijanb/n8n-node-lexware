@@ -426,8 +426,7 @@ export async function executeContacts(
             defaultValue?: unknown
           ) => unknown
         )(name, index, def);
-      const op = this.getNodeParameter("operation", i) as string;
-      const isCompany = op === "update" ? true : true;
+
       const body = buildCompanyContactBody(this, getParam, i);
       responseData = await lexwareApiRequest.call(
         this,

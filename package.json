@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-lexware",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "N8N nodes for Lexware API integration",
   "keywords": [
     "n8n",
@@ -11,14 +11,14 @@
     "integration"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://github.com/adrijanb/n8n-node-lexware#readme",
   "author": {
     "name": "Adrijan Bajrami",
     "email": "adrijan.bajrami@example.com"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/n8n-nodes-lexware.git"
+    "url": "git+https://github.com/adrijanb/n8n-node-lexware.git"
   },
   "main": "index.js",
   "scripts": {

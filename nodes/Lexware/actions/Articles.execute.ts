@@ -4,10 +4,7 @@ import {
   INodeExecutionData,
   NodeOperationError,
 } from "n8n-workflow";
-import {
-  lexwareApiRequest,
-  lexwareApiRequestAllItems,
-} from "../GenericFunctions";
+import { lexwareApiRequest } from "../GenericFunctions";
 
 function buildArticleBody(
   getParam: (name: string, index?: number, defaultValue?: unknown) => unknown,
