@@ -359,7 +359,7 @@ export class LexwareValidator {
             `lineItems[${index}].unitPrice.priceType`,
             { required: true }
           );
-          
+
           if (priceType && !["net", "gross"].includes(priceType)) {
             throw new NodeOperationError(
               this.context.getNode(),
@@ -379,7 +379,11 @@ export class LexwareValidator {
             { min: 0, max: 100, required: true }
           );
 
-          if (priceType && priceAmount !== undefined && taxRatePercentage !== undefined) {
+          if (
+            priceType &&
+            priceAmount !== undefined &&
+            taxRatePercentage !== undefined
+          ) {
             // Calculate net and gross amounts automatically
             let netAmount: number;
             let grossAmount: number;
@@ -394,7 +398,8 @@ export class LexwareValidator {
 
             // Round to 2 decimal places
             validatedUnitPrice.netAmount = Math.round(netAmount * 100) / 100;
-            validatedUnitPrice.grossAmount = Math.round(grossAmount * 100) / 100;
+            validatedUnitPrice.grossAmount =
+              Math.round(grossAmount * 100) / 100;
             validatedUnitPrice.taxRatePercentage = taxRatePercentage;
           }
         } else {

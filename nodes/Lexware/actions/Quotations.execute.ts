@@ -87,8 +87,8 @@ export async function executeQuotations(
       const lineItemsJson = this.getNodeParameter(
         "lineItemsJson",
         i,
-        []
-      ) as IDataObject[];
+        "[]"
+      ) as string | IDataObject[];
       const totalPriceRaw =
         (this.getNodeParameter("totalPrice.value", i, {}) as IDataObject) || {};
       const taxConditionsRaw =
@@ -101,7 +101,11 @@ export async function executeQuotations(
       const voucherDate = validator.validateDate(voucherDateRaw, "voucherDate");
       const expiryDate = validator.validateDate(expiryDateRaw, "expiryDate");
       const address = validator.validateAddress(contactIdRaw, manualAddressRaw);
-      const lineItems = validator.validateLineItems(lineItemsJson);
+      
+      // Parse line items from JSON first, then validate
+      const parsedLineItems = parseLineItemsFromJson(lineItemsJson);
+      const lineItems = validator.validateLineItems(parsedLineItems);
+      
       const totalPrice = validator.validateTotalPrice(totalPriceRaw);
       const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
 
@@ -113,7 +117,7 @@ export async function executeQuotations(
         voucherDate,
         expiryDate,
         address,
-        lineItems: lineItems || parseLineItemsFromJson(lineItemsJson),
+        lineItems,
         totalPrice,
         taxConditions,
       });

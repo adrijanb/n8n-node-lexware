@@ -5,36 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 02.09.2025
+
+### 🐛 **Critical Bugfix**
+- **Fixed "lineItems.map is not a function" Error**: Behebt kritischen Fehler in `Create By JSON` Operation
+- **Improved JSON Parsing**: Korrigiert Line Items JSON Parsing vor Validierung  
+- **Enhanced Error Handling**: Robuste Behandlung verschiedener Line Items Input-Formate
+
+### 🔧 **Technical Details**
+- **Root Cause**: `validateLineItems()` wurde mit ungeparsten JSON-Daten aufgerufen
+- **Solution**: JSON wird jetzt **vor** Validierung mit `parseLineItemsFromJson()` geparst
+- **Impact**: `Create By JSON` Operation funktioniert jetzt korrekt mit Line Items
+
+### ✅ **Fixed Operations**
+- **Create By JSON**: Quotations können jetzt korrekt über JSON mit Line Items erstellt werden
+- **Line Items Processing**: Verbesserte Verarbeitung von JSON Line Items Input
+- **Type Safety**: Robustere TypeScript Typisierung für JSON Input
+
+---
+
 ## [1.2.0] - 02.09.2025
 
 ### 🚀 **Intelligent Price Calculation (Major Feature)**
+
 - **Smart Price Type Selection**: Dropdown für "Netto" oder "Brutto" Preise
 - **Automatic Calculation**: Automatische Berechnung der jeweils anderen Preiskomponente
 - **User-Friendly Interface**: Nur noch 3 einfache Eingaben erforderlich:
   - **Price Type**: Netto oder Brutto (Dropdown)
-  - **Price Amount**: Der Preis (nur eine Eingabe!)  
+  - **Price Amount**: Der Preis (nur eine Eingabe!)
   - **Tax Rate**: Steuersatz in %
 
 ### 🎯 **Enhanced User Experience**
+
 - **Simplified Workflow**: Keine manuelle Berechnung von Netto/Brutto mehr nötig
 - **Error Prevention**: Eliminiert Berechnungsfehler durch automatische Preisberechnung
 - **Currency Selection**: Dropdown mit häufigsten Währungen (EUR, USD, GBP, CHF)
 - **Precision**: Automatische Rundung auf 2 Dezimalstellen
 
 ### 🔧 **Technical Improvements**
+
 - **Backward Compatibility**: Vollständige Unterstützung der alten Preisstruktur
 - **Smart Validation**: Intelligente Validierung für beide Preisstrukturen
 - **Accurate Calculations**: Präzise Netto/Brutto Berechnungen mit korrekter Rundung
 - **Type Safety**: Robuste TypeScript Typisierung für alle Preisberechnungen
 
 ### 📋 **How It Works**
+
 1. **Select Price Type**: "Net Price (excluding tax)" oder "Gross Price (including tax)"
 2. **Enter Price**: Den bekannten Preis eingeben
 3. **Set Tax Rate**: Steuersatz eingeben (z.B. 19 für 19% MwSt)
 4. **Automatic Magic**: System berechnet automatisch die fehlenden Werte
 
 **Beispiel:**
-- Price Type: "Net Price" 
+
+- Price Type: "Net Price"
 - Price Amount: 20.08
 - Tax Rate: 19%
 - **→ System berechnet automatisch Gross Amount: 23.90**
@@ -216,7 +240,7 @@ Basierend auf der [Lexware API Dokumentation](https://developers.lexware.io/docs
 
 ---
 
-## [1.0.2] - 2024-12-18
+## [1.0.2]
 
 ### 🔧 Improved
 
@@ -225,7 +249,7 @@ Basierend auf der [Lexware API Dokumentation](https://developers.lexware.io/docs
 
 ---
 
-## [1.0.1] - 2024-12-17
+## [1.0.1]
 
 ### 🐛 Fixed
 
@@ -234,7 +258,7 @@ Basierend auf der [Lexware API Dokumentation](https://developers.lexware.io/docs
 
 ---
 
-## [1.0.0] - 2024-12-16
+## [1.0.0]
 
 ### 🎉 Initial Release
 
