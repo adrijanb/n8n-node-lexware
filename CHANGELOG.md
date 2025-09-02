@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2024-12-19
+
+### 🐛 Fixed
+- **Comprehensive Input Validation**: Added robust validation for all API requests
+  - Prevents malformed data from causing API errors
+  - UUID validation for entity IDs
+  - String length validation with proper limits
+  - Number range validation for prices and percentages
+  - Date format validation with automatic parsing
+  - Currency code validation (3-letter ISO codes)
+  - Address validation for both contactId and manual address fields
+  - Enum validation for type fields (e.g., article types, tax types)
+
+### 🔧 Improved
+- **Error Handling**: Better error messages with field-specific validation failures
+- **Data Sanitization**: Automatic trimming and cleaning of input data
+- **Type Safety**: Enhanced TypeScript validation throughout the codebase
+
+### 📚 Code Quality
+- **Modular Validation**: Centralized validation utility class (`LexwareValidator`)
+- **Consistent Error Reporting**: Standardized error messages across all resources
+- **Clean Request Bodies**: Automatic removal of undefined/empty values
+
+---
+
 ## [1.1.0] - 2024-12-19
 
 ### ✨ Added

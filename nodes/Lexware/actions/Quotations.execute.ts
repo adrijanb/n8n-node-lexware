@@ -9,6 +9,7 @@ import {
   parseLineItemsFromCollection,
   parseLineItemsFromJson,
 } from "../utils/LineItems";
+import { LexwareValidator } from "../utils/validation";
 
 export async function executeQuotations(
   this: IExecuteFunctions,
@@ -19,66 +20,49 @@ export async function executeQuotations(
 
   switch (operation) {
     case "create": {
-      // Structured create
-      const title = this.getNodeParameter("title", i, "") as string;
-      const introduction = this.getNodeParameter(
-        "introduction",
-        i,
-        ""
-      ) as string;
-      const remark = this.getNodeParameter("remark", i, "") as string;
-      const voucherDate = this.getNodeParameter("voucherDate", i, "") as string;
-      const expiryDate = this.getNodeParameter("expiryDate", i, "") as string;
-      const contactId = this.getNodeParameter("contactId", i, "") as string;
-      const manualAddressRaw =
-        (this.getNodeParameter(
-          "manualAddress.address",
-          i,
-          {}
-        ) as IDataObject) || {};
+      // Initialize validator
+      const validator = new LexwareValidator(this);
+
+      // Get raw parameters
+      const titleRaw = this.getNodeParameter("title", i, "") as string;
+      const introductionRaw = this.getNodeParameter("introduction", i, "") as string;
+      const remarkRaw = this.getNodeParameter("remark", i, "") as string;
+      const voucherDateRaw = this.getNodeParameter("voucherDate", i, "") as string;
+      const expiryDateRaw = this.getNodeParameter("expiryDate", i, "") as string;
+      const contactIdRaw = this.getNodeParameter("contactId", i, "") as string;
+      const manualAddressRaw = 
+        (this.getNodeParameter("manualAddress.address", i, {}) as IDataObject) || {};
       const lineItemsRaw =
         (this.getNodeParameter("lineItems.item", i, []) as IDataObject[]) || [];
       const totalPriceRaw =
         (this.getNodeParameter("totalPrice.value", i, {}) as IDataObject) || {};
       const taxConditionsRaw =
-        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
-        {};
+        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) || {};
 
-      // Build address object - prefer contactId, fallback to manual address
-      let address: IDataObject | undefined;
-      if (contactId) {
-        address = { contactId };
-      } else if (Object.keys(manualAddressRaw).length > 0) {
-        address = {
-          name: manualAddressRaw.name || undefined,
-          supplement: manualAddressRaw.supplement || undefined,
-          street: manualAddressRaw.street || undefined,
-          city: manualAddressRaw.city || undefined,
-          zip: manualAddressRaw.zip || undefined,
-          countryCode: manualAddressRaw.countryCode || undefined,
-        };
-        // Remove undefined values
-        address = Object.fromEntries(
-          Object.entries(address).filter(([_, value]) => value !== undefined)
-        );
-      }
+      // Validate all fields
+      const title = validator.validateString(titleRaw, "title", { maxLength: 255 });
+      const introduction = validator.validateString(introductionRaw, "introduction", { maxLength: 1000 });
+      const remark = validator.validateString(remarkRaw, "remark", { maxLength: 1000 });
+      const voucherDate = validator.validateDate(voucherDateRaw, "voucherDate");
+      const expiryDate = validator.validateDate(expiryDateRaw, "expiryDate");
+      const address = validator.validateAddress(contactIdRaw, manualAddressRaw);
+      const lineItems = validator.validateLineItems(lineItemsRaw);
+      const totalPrice = validator.validateTotalPrice(totalPriceRaw);
+      const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
 
-      const body: IDataObject = {
-        title: title || undefined,
-        introduction: introduction || undefined,
-        remark: remark || undefined,
-        voucherDate: voucherDate || undefined,
-        expiryDate: expiryDate || undefined,
-        address: address,
-        lineItems: parseLineItemsFromCollection(lineItemsRaw),
-        totalPrice: totalPriceRaw.currency
-          ? { currency: totalPriceRaw.currency }
-          : undefined,
-        taxConditions:
-          Object.keys(taxConditionsRaw).length > 0
-            ? taxConditionsRaw
-            : undefined,
-      };
+      // Build and clean request body
+      const body = validator.createCleanBody({
+        title,
+        introduction,
+        remark,
+        voucherDate,
+        expiryDate,
+        address,
+        lineItems: lineItems || parseLineItemsFromCollection(lineItemsRaw),
+        totalPrice,
+        taxConditions,
+      });
+
       responseData = await lexwareApiRequest.call(
         this,
         "POST",
@@ -88,22 +72,18 @@ export async function executeQuotations(
       break;
     }
     case "createByJson": {
-      const title = this.getNodeParameter("title", i, "") as string;
-      const introduction = this.getNodeParameter(
-        "introduction",
-        i,
-        ""
-      ) as string;
-      const remark = this.getNodeParameter("remark", i, "") as string;
-      const voucherDate = this.getNodeParameter("voucherDate", i, "") as string;
-      const expiryDate = this.getNodeParameter("expiryDate", i, "") as string;
-      const contactId = this.getNodeParameter("contactId", i, "") as string;
+      // Initialize validator
+      const validator = new LexwareValidator(this);
+
+      // Get raw parameters
+      const titleRaw = this.getNodeParameter("title", i, "") as string;
+      const introductionRaw = this.getNodeParameter("introduction", i, "") as string;
+      const remarkRaw = this.getNodeParameter("remark", i, "") as string;
+      const voucherDateRaw = this.getNodeParameter("voucherDate", i, "") as string;
+      const expiryDateRaw = this.getNodeParameter("expiryDate", i, "") as string;
+      const contactIdRaw = this.getNodeParameter("contactId", i, "") as string;
       const manualAddressRaw =
-        (this.getNodeParameter(
-          "manualAddress.address",
-          i,
-          {}
-        ) as IDataObject) || {};
+        (this.getNodeParameter("manualAddress.address", i, {}) as IDataObject) || {};
       const lineItemsJson = this.getNodeParameter(
         "lineItemsJson",
         i,
@@ -112,44 +92,32 @@ export async function executeQuotations(
       const totalPriceRaw =
         (this.getNodeParameter("totalPrice.value", i, {}) as IDataObject) || {};
       const taxConditionsRaw =
-        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
-        {};
+        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) || {};
 
-      // Build address object - prefer contactId, fallback to manual address
-      let address: IDataObject | undefined;
-      if (contactId) {
-        address = { contactId };
-      } else if (Object.keys(manualAddressRaw).length > 0) {
-        address = {
-          name: manualAddressRaw.name || undefined,
-          supplement: manualAddressRaw.supplement || undefined,
-          street: manualAddressRaw.street || undefined,
-          city: manualAddressRaw.city || undefined,
-          zip: manualAddressRaw.zip || undefined,
-          countryCode: manualAddressRaw.countryCode || undefined,
-        };
-        // Remove undefined values
-        address = Object.fromEntries(
-          Object.entries(address).filter(([_, value]) => value !== undefined)
-        );
-      }
+      // Validate all fields
+      const title = validator.validateString(titleRaw, "title", { maxLength: 255 });
+      const introduction = validator.validateString(introductionRaw, "introduction", { maxLength: 1000 });
+      const remark = validator.validateString(remarkRaw, "remark", { maxLength: 1000 });
+      const voucherDate = validator.validateDate(voucherDateRaw, "voucherDate");
+      const expiryDate = validator.validateDate(expiryDateRaw, "expiryDate");
+      const address = validator.validateAddress(contactIdRaw, manualAddressRaw);
+      const lineItems = validator.validateLineItems(lineItemsJson);
+      const totalPrice = validator.validateTotalPrice(totalPriceRaw);
+      const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
 
-      const body: IDataObject = {
-        title: title || undefined,
-        introduction: introduction || undefined,
-        remark: remark || undefined,
-        voucherDate: voucherDate || undefined,
-        expiryDate: expiryDate || undefined,
-        address: address,
-        lineItems: parseLineItemsFromJson(lineItemsJson),
-        totalPrice: totalPriceRaw.currency
-          ? { currency: totalPriceRaw.currency }
-          : undefined,
-        taxConditions:
-          Object.keys(taxConditionsRaw).length > 0
-            ? taxConditionsRaw
-            : undefined,
-      };
+      // Build and clean request body
+      const body = validator.createCleanBody({
+        title,
+        introduction,
+        remark,
+        voucherDate,
+        expiryDate,
+        address,
+        lineItems: lineItems || parseLineItemsFromJson(lineItemsJson),
+        totalPrice,
+        taxConditions,
+      });
+
       responseData = await lexwareApiRequest.call(
         this,
         "POST",
@@ -160,15 +128,31 @@ export async function executeQuotations(
     }
     case "get": {
       const id = this.getNodeParameter("quotationId", i) as string;
+      
+      // Validate quotation ID
+      const validator = new LexwareValidator(this);
+      const validatedId = validator.validateString(id, "quotationId", { 
+        required: true,
+        pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      });
+      
       responseData = await lexwareApiRequest.call(
         this,
         "GET",
-        `/v1/quotations/${id}`
+        `/v1/quotations/${validatedId}`
       );
       break;
     }
     case "getAll": {
-      const page = this.getNodeParameter("page", i, 0) as number;
+      const pageRaw = this.getNodeParameter("page", i, 0) as number;
+      
+      // Validate page number
+      const validator = new LexwareValidator(this);
+      const page = validator.validateNumber(pageRaw, "page", { 
+        min: 0, 
+        integer: true 
+      }) || 0;
+      
       responseData = await lexwareApiRequest.call(
         this,
         "GET",
@@ -179,66 +163,56 @@ export async function executeQuotations(
       break;
     }
     case "update": {
-      const id = this.getNodeParameter("quotationId", i) as string;
-      const title = this.getNodeParameter("title", i, "") as string;
-      const introduction = this.getNodeParameter(
-        "introduction",
-        i,
-        ""
-      ) as string;
-      const remark = this.getNodeParameter("remark", i, "") as string;
-      const voucherDate = this.getNodeParameter("voucherDate", i, "") as string;
-      const expiryDate = this.getNodeParameter("expiryDate", i, "") as string;
-      const contactId = this.getNodeParameter("contactId", i, "") as string;
+      // Initialize validator
+      const validator = new LexwareValidator(this);
+
+      // Get and validate quotation ID
+      const idRaw = this.getNodeParameter("quotationId", i) as string;
+      const id = validator.validateString(idRaw, "quotationId", { 
+        required: true,
+        pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      });
+
+      // Get raw parameters
+      const titleRaw = this.getNodeParameter("title", i, "") as string;
+      const introductionRaw = this.getNodeParameter("introduction", i, "") as string;
+      const remarkRaw = this.getNodeParameter("remark", i, "") as string;
+      const voucherDateRaw = this.getNodeParameter("voucherDate", i, "") as string;
+      const expiryDateRaw = this.getNodeParameter("expiryDate", i, "") as string;
+      const contactIdRaw = this.getNodeParameter("contactId", i, "") as string;
       const manualAddressRaw =
-        (this.getNodeParameter(
-          "manualAddress.address",
-          i,
-          {}
-        ) as IDataObject) || {};
+        (this.getNodeParameter("manualAddress.address", i, {}) as IDataObject) || {};
       const lineItemsRaw =
         (this.getNodeParameter("lineItems.item", i, []) as IDataObject[]) || [];
       const totalPriceRaw =
         (this.getNodeParameter("totalPrice.value", i, {}) as IDataObject) || {};
       const taxConditionsRaw =
-        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
-        {};
+        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) || {};
 
-      // Build address object - prefer contactId, fallback to manual address
-      let address: IDataObject | undefined;
-      if (contactId) {
-        address = { contactId };
-      } else if (Object.keys(manualAddressRaw).length > 0) {
-        address = {
-          name: manualAddressRaw.name || undefined,
-          supplement: manualAddressRaw.supplement || undefined,
-          street: manualAddressRaw.street || undefined,
-          city: manualAddressRaw.city || undefined,
-          zip: manualAddressRaw.zip || undefined,
-          countryCode: manualAddressRaw.countryCode || undefined,
-        };
-        // Remove undefined values
-        address = Object.fromEntries(
-          Object.entries(address).filter(([_, value]) => value !== undefined)
-        );
-      }
+      // Validate all fields
+      const title = validator.validateString(titleRaw, "title", { maxLength: 255 });
+      const introduction = validator.validateString(introductionRaw, "introduction", { maxLength: 1000 });
+      const remark = validator.validateString(remarkRaw, "remark", { maxLength: 1000 });
+      const voucherDate = validator.validateDate(voucherDateRaw, "voucherDate");
+      const expiryDate = validator.validateDate(expiryDateRaw, "expiryDate");
+      const address = validator.validateAddress(contactIdRaw, manualAddressRaw);
+      const lineItems = validator.validateLineItems(lineItemsRaw);
+      const totalPrice = validator.validateTotalPrice(totalPriceRaw);
+      const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
 
-      const body: IDataObject = {
-        title: title || undefined,
-        introduction: introduction || undefined,
-        remark: remark || undefined,
-        voucherDate: voucherDate || undefined,
-        expiryDate: expiryDate || undefined,
-        address: address,
-        lineItems: parseLineItemsFromCollection(lineItemsRaw),
-        totalPrice: totalPriceRaw.currency
-          ? { currency: totalPriceRaw.currency }
-          : undefined,
-        taxConditions:
-          Object.keys(taxConditionsRaw).length > 0
-            ? taxConditionsRaw
-            : undefined,
-      };
+      // Build and clean request body
+      const body = validator.createCleanBody({
+        title,
+        introduction,
+        remark,
+        voucherDate,
+        expiryDate,
+        address,
+        lineItems: lineItems || parseLineItemsFromCollection(lineItemsRaw),
+        totalPrice,
+        taxConditions,
+      });
+
       responseData = await lexwareApiRequest.call(
         this,
         "PUT",
@@ -248,7 +222,15 @@ export async function executeQuotations(
       break;
     }
     case "delete": {
-      const id = this.getNodeParameter("quotationId", i) as string;
+      const idRaw = this.getNodeParameter("quotationId", i) as string;
+      
+      // Validate quotation ID
+      const validator = new LexwareValidator(this);
+      const id = validator.validateString(idRaw, "quotationId", { 
+        required: true,
+        pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      });
+      
       responseData = await lexwareApiRequest.call(
         this,
         "DELETE",
