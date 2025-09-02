@@ -5,19 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 02.09.2025
+
+### 🎯 **API Compliance & UX Improvements**
+
+- **Removed lineItemAmount**: Entfernt da nicht von Lexware API gefordert
+- **Fixed unitPrice Structure**: Nur netAmount ODER grossAmount wird gesendet (API-konform)
+- **Simplified SubItems UI**: SubItems jetzt als benutzerfreundliche FixedCollection anstatt JSON
+
+### 🔧 **Technical Fixes**
+
+- **unitPrice Logic**: Sendet nur relevanten Preis-Typ an API (net oder gross, nicht beide)
+- **SubItems Processing**: Verbesserte Verarbeitung von SubItems aus FixedCollection Format
+- **API Compatibility**: Vollständige Konformität mit Lexware API Spezifikation
+
+### 🚀 **User Experience**
+
+- **Cleaner UI**: Weniger verwirrende Felder in der Benutzeroberfläche
+- **Better SubItems**: SubItems können jetzt direkt in der UI konfiguriert werden
+- **Reduced Complexity**: Entfernung nicht erforderlicher Felder vereinfacht die Eingabe
+
+### ✅ **What Changed**
+
+- **Removed**: `lineItemAmount` Feld (nicht API-erforderlich)
+- **Fixed**: `unitPrice` sendet nur netAmount ODER grossAmount
+- **Improved**: SubItems als strukturierte FixedCollection
+- **Enhanced**: API-konforme Datenübertragung
+
+---
+
 ## [1.2.1] - 02.09.2025
 
 ### 🐛 **Critical Bugfix**
+
 - **Fixed "lineItems.map is not a function" Error**: Behebt kritischen Fehler in `Create By JSON` Operation
-- **Improved JSON Parsing**: Korrigiert Line Items JSON Parsing vor Validierung  
+- **Improved JSON Parsing**: Korrigiert Line Items JSON Parsing vor Validierung
 - **Enhanced Error Handling**: Robuste Behandlung verschiedener Line Items Input-Formate
 
 ### 🔧 **Technical Details**
+
 - **Root Cause**: `validateLineItems()` wurde mit ungeparsten JSON-Daten aufgerufen
 - **Solution**: JSON wird jetzt **vor** Validierung mit `parseLineItemsFromJson()` geparst
 - **Impact**: `Create By JSON` Operation funktioniert jetzt korrekt mit Line Items
 
 ### ✅ **Fixed Operations**
+
 - **Create By JSON**: Quotations können jetzt korrekt über JSON mit Line Items erstellt werden
 - **Line Items Processing**: Verbesserte Verarbeitung von JSON Line Items Input
 - **Type Safety**: Robustere TypeScript Typisierung für JSON Input
@@ -240,7 +272,7 @@ Basierend auf der [Lexware API Dokumentation](https://developers.lexware.io/docs
 
 ---
 
-## [1.0.2]
+## [1.0.2]immer
 
 ### 🔧 Improved
 

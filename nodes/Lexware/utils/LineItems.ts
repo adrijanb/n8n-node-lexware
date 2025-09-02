@@ -49,18 +49,20 @@ export function parseLineItemsFromCollection(
         const priceAmount = Number(unitPriceValue.priceAmount);
         const priceType = unitPriceValue.priceType as string;
 
-        const { netAmount, grossAmount } = calculatePriceAmounts(
-          priceAmount,
-          taxRatePercentage,
-          priceType
-        );
-
-        unitPrice = {
-          currency,
-          netAmount,
-          grossAmount,
-          taxRatePercentage,
-        };
+        // According to Lexware API: only send netAmount OR grossAmount, not both
+        if (priceType === "net") {
+          unitPrice = {
+            currency,
+            netAmount: Math.round(priceAmount * 100) / 100,
+            taxRatePercentage,
+          };
+        } else {
+          unitPrice = {
+            currency,
+            grossAmount: Math.round(priceAmount * 100) / 100,
+            taxRatePercentage,
+          };
+        }
       } else {
         // Fallback to old structure for backward compatibility
         unitPrice = {
@@ -72,17 +74,21 @@ export function parseLineItemsFromCollection(
       }
     }
 
-    // Parse subItems if provided as JSON string
+    // Parse subItems from fixedCollection format
     let subItems: IDataObject[] = [];
-    if (it?.subItems) {
-      try {
-        if (typeof it.subItems === "string") {
-          subItems = JSON.parse(it.subItems as string);
-        } else if (Array.isArray(it.subItems)) {
-          subItems = it.subItems as IDataObject[];
-        }
-      } catch (error) {
-        console.warn("Failed to parse subItems JSON:", error);
+    if (it?.subItems && typeof it.subItems === "object") {
+      const subItemsCollection = (it.subItems as IDataObject)
+        ?.subItem as IDataObject[];
+      if (Array.isArray(subItemsCollection)) {
+        subItems = subItemsCollection.map((subItem) => ({
+          type: subItem.type || "custom",
+          name: subItem.name,
+          description: subItem.description,
+          quantity: subItem.quantity,
+          unitName: subItem.unitName,
+          alternative: subItem.alternative || false,
+          optional: subItem.optional || false,
+        }));
       }
     }
 
@@ -94,7 +100,6 @@ export function parseLineItemsFromCollection(
       unitName: it?.unitName,
       unitPrice,
       discountPercentage: it?.discountPercentage,
-      lineItemAmount: it?.lineItemAmount,
     };
 
     // Add optional fields only if they are set

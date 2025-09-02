@@ -390,16 +390,14 @@ export class LexwareValidator {
 
             if (priceType === "net") {
               netAmount = priceAmount;
-              grossAmount = netAmount * (1 + taxRatePercentage / 100);
+              // For net price, only include netAmount in API request
+              validatedUnitPrice.netAmount = Math.round(netAmount * 100) / 100;
             } else {
               grossAmount = priceAmount;
-              netAmount = grossAmount / (1 + taxRatePercentage / 100);
+              // For gross price, only include grossAmount in API request  
+              validatedUnitPrice.grossAmount = Math.round(grossAmount * 100) / 100;
             }
 
-            // Round to 2 decimal places
-            validatedUnitPrice.netAmount = Math.round(netAmount * 100) / 100;
-            validatedUnitPrice.grossAmount =
-              Math.round(grossAmount * 100) / 100;
             validatedUnitPrice.taxRatePercentage = taxRatePercentage;
           }
         } else {
@@ -441,15 +439,6 @@ export class LexwareValidator {
       );
       if (discountPercentage !== undefined)
         validatedItem.discountPercentage = discountPercentage;
-
-      // Line item amount
-      const lineItemAmount = this.validateNumber(
-        item.lineItemAmount as number,
-        `lineItems[${index}].lineItemAmount`,
-        { min: 0 }
-      );
-      if (lineItemAmount !== undefined)
-        validatedItem.lineItemAmount = lineItemAmount;
 
       return validatedItem;
     });

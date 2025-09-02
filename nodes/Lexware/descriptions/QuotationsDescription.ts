@@ -306,13 +306,6 @@ export const quotationsFields: INodeProperties[] = [
             default: 0,
           },
           {
-            displayName: "Line Item Amount",
-            name: "lineItemAmount",
-            type: "number",
-            default: 0,
-            description: "Total amount for this line item (usually calculated automatically)",
-          },
-          {
             displayName: "Alternative",
             name: "alternative",
             type: "boolean",
@@ -329,9 +322,46 @@ export const quotationsFields: INodeProperties[] = [
           {
             displayName: "Sub Items",
             name: "subItems",
-            type: "json",
-            default: "[]",
-            description: "Sub-items array in JSON format for nested line items",
+            type: "fixedCollection",
+            typeOptions: { multipleValues: true },
+            default: {},
+            description: "Sub-items for nested line items (alternatives, optional items)",
+            options: [
+              {
+                name: "subItem",
+                displayName: "Sub Item",
+                values: [
+                  {
+                    displayName: "Type",
+                    name: "type",
+                    type: "options",
+                    options: [
+                      { name: "Custom", value: "custom" },
+                      { name: "Material", value: "material" },
+                      { name: "Service", value: "service" },
+                      { name: "Text", value: "text" },
+                    ],
+                    default: "custom",
+                  },
+                  { displayName: "Name", name: "name", type: "string", default: "" },
+                  { displayName: "Description", name: "description", type: "string", default: "" },
+                  { displayName: "Quantity", name: "quantity", type: "number", default: 1 },
+                  { displayName: "Unit Name", name: "unitName", type: "string", default: "" },
+                  {
+                    displayName: "Alternative",
+                    name: "alternative",
+                    type: "boolean",
+                    default: false,
+                  },
+                  {
+                    displayName: "Optional",
+                    name: "optional",
+                    type: "boolean",
+                    default: false,
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
