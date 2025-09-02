@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-12-19
+
+### 🆕 **Enhanced Error Handling & Developer Experience**
+- **`LexwareErrorHandler` Utility**: Professional error formatting and handling
+  - Detailed HTTP status code handling (400, 401, 403, 404, 409, 422, 429, 5xx)
+  - Structured error messages with actionable descriptions
+  - Field-specific validation error formatting
+  - Business logic error extraction and display
+  - Rate limiting error handling with retry suggestions
+  - Network and authentication error guidance
+
+### 🛠️ **Improved Error Messages**
+- **Context-Aware Errors**: Errors now include operation and resource type context
+- **Validation Error Details**: Shows current vs. expected values (e.g., length limits)
+- **API Error Passthrough**: Original Lexware API errors are properly formatted and displayed
+- **Developer-Friendly Format**: Clear error structure with descriptions and suggestions
+
+### 🔧 **Better Debugging Experience**
+- **Error Context**: Automatic error context creation with sanitized parameters
+- **Sensitive Data Protection**: Automatic sanitization of tokens and credentials in error logs
+- **Enhanced Stack Traces**: Better error tracking through the validation and API layers
+
+### 📚 **Code Quality**
+- **Centralized Error Handling**: All API calls now use consistent error formatting
+- **Type-Safe Error Handling**: Enhanced TypeScript support for error scenarios
+- **Modular Architecture**: Separate validation and error handling utilities
+
+---
+
 ## [1.1.1] - 2024-12-19
 
 ### 🐛 Fixed

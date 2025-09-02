@@ -6,6 +6,7 @@ import {
   IHttpRequestMethods,
   JsonObject,
 } from "n8n-workflow";
+import { LexwareErrorHandler } from "./utils/errorHandler";
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,30 +90,17 @@ export async function lexwareApiRequest(
     ...optionOverrides,
   } as IHttpRequestOptions;
 
-  try {
-    return await httpRequestWithBackoff.call(this, options);
-  } catch (error) {
-    // Versuche, die Fehlermeldung der Lexware-API aussagekräftig zu extrahieren
-    const err = error as unknown as {
-      response?: { body?: any; data?: any; statusCode?: number };
-      message?: string;
-    };
-    const body = (err?.response?.body ?? err?.response?.data) as any;
-    const apiMsg =
-      typeof body === "string"
-        ? body
-        : body?.message || body?.error || body?.detail || body?.errors;
-    const merged: JsonObject = {
-      message: (apiMsg
-        ? `Lexware API error: ${JSON.stringify(apiMsg)}`
-        : err?.message || "Request failed") as string,
-      responseBody: body as JsonObject,
-      statusCode: err?.response?.statusCode as
-        | number
-        | undefined as unknown as JsonObject,
-    } as JsonObject;
-    throw new NodeApiError(this.getNode(), merged);
-  }
+  // Extract resource type and operation for better error handling
+  const resourceType = endpoint.split("/")[2] || "unknown";
+  const operation = method.toLowerCase();
+
+  const errorHandler = new LexwareErrorHandler(this);
+
+  return await errorHandler.wrapApiCall(
+    async () => await httpRequestWithBackoff.call(this, options),
+    operation,
+    resourceType
+  );
 }
 
 export async function lexwareApiRequestAllItems(

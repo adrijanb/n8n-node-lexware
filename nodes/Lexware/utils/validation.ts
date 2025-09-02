@@ -1,5 +1,6 @@
 import { IDataObject, NodeOperationError } from "n8n-workflow";
 import { IExecuteFunctions } from "n8n-core";
+import { LexwareErrorHandler } from "./errorHandler";
 
 /**
  * Validation utility for Lexware API requests
@@ -26,9 +27,18 @@ export class LexwareValidator {
   ): string | undefined {
     if (!value || value.trim() === "") {
       if (options.required) {
+        const errorMessage = LexwareErrorHandler.formatValidationError(
+          fieldName, 
+          value, 
+          'is required and cannot be empty'
+        );
         throw new NodeOperationError(
           this.context.getNode(),
-          `Field '${fieldName}' is required and cannot be empty`
+          errorMessage,
+          {
+            description: `Please provide a valid value for ${fieldName}`,
+
+          }
         );
       }
       return undefined;
@@ -37,23 +47,50 @@ export class LexwareValidator {
     const trimmed = value.trim();
 
     if (options.minLength && trimmed.length < options.minLength) {
+      const errorMessage = LexwareErrorHandler.formatValidationError(
+        fieldName, 
+        value, 
+        `must be at least ${options.minLength} characters long (current: ${trimmed.length})`
+      );
       throw new NodeOperationError(
         this.context.getNode(),
-        `Field '${fieldName}' must be at least ${options.minLength} characters long`
+        errorMessage,
+        {
+          description: `Please provide a longer value for ${fieldName}`,
+
+        }
       );
     }
 
     if (options.maxLength && trimmed.length > options.maxLength) {
+      const errorMessage = LexwareErrorHandler.formatValidationError(
+        fieldName, 
+        value, 
+        `cannot be longer than ${options.maxLength} characters (current: ${trimmed.length})`
+      );
       throw new NodeOperationError(
         this.context.getNode(),
-        `Field '${fieldName}' cannot be longer than ${options.maxLength} characters`
+        errorMessage,
+        {
+          description: `Please provide a shorter value for ${fieldName}`,
+
+        }
       );
     }
 
     if (options.pattern && !options.pattern.test(trimmed)) {
+      const errorMessage = LexwareErrorHandler.formatValidationError(
+        fieldName, 
+        value, 
+        'has invalid format'
+      );
       throw new NodeOperationError(
         this.context.getNode(),
-        `Field '${fieldName}' has invalid format`
+        errorMessage,
+        {
+          description: `Please provide a valid format for ${fieldName}`,
+
+        }
       );
     }
 
@@ -79,7 +116,7 @@ export class LexwareValidator {
     }
 
     const trimmed = value.trim();
-    
+
     // Try to parse the date
     const date = new Date(trimmed);
     if (isNaN(date.getTime())) {
@@ -112,7 +149,7 @@ export class LexwareValidator {
     }
 
     const trimmed = value.trim().toUpperCase();
-    
+
     // Basic currency code validation (3 letters)
     const currencyPattern = /^[A-Z]{3}$/;
     if (!currencyPattern.test(trimmed)) {
@@ -149,7 +186,7 @@ export class LexwareValidator {
     }
 
     const num = typeof value === "string" ? parseFloat(value) : value;
-    
+
     if (isNaN(num)) {
       throw new NodeOperationError(
         this.context.getNode(),
@@ -186,22 +223,22 @@ export class LexwareValidator {
    */
   validateAddress(
     contactId: string | undefined,
-    manualAddress: IDataObject | undefined,
-    fieldName: string = "address"
+    manualAddress: IDataObject | undefined
   ): IDataObject | undefined {
     // If contactId is provided, use it
     if (contactId && contactId.trim()) {
       const trimmedContactId = contactId.trim();
-      
+
       // Basic UUID validation for contactId
-      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      const uuidPattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
       if (!uuidPattern.test(trimmedContactId)) {
         throw new NodeOperationError(
           this.context.getNode(),
           `Contact ID must be a valid UUID format`
         );
       }
-      
+
       return { contactId: trimmedContactId };
     }
 
@@ -268,7 +305,9 @@ export class LexwareValidator {
   /**
    * Validates line items array
    */
-  validateLineItems(lineItems: IDataObject[] | undefined): IDataObject[] | undefined {
+  validateLineItems(
+    lineItems: IDataObject[] | undefined
+  ): IDataObject[] | undefined {
     if (!lineItems || lineItems.length === 0) {
       return undefined;
     }
@@ -345,14 +384,16 @@ export class LexwareValidator {
           `lineItems[${index}].unitPrice.grossAmount`,
           { min: 0 }
         );
-        if (grossAmount !== undefined) validatedUnitPrice.grossAmount = grossAmount;
+        if (grossAmount !== undefined)
+          validatedUnitPrice.grossAmount = grossAmount;
 
         const taxRatePercentage = this.validateNumber(
           unitPrice.taxRatePercentage as number,
           `lineItems[${index}].unitPrice.taxRatePercentage`,
           { min: 0, max: 100 }
         );
-        if (taxRatePercentage !== undefined) validatedUnitPrice.taxRatePercentage = taxRatePercentage;
+        if (taxRatePercentage !== undefined)
+          validatedUnitPrice.taxRatePercentage = taxRatePercentage;
 
         if (Object.keys(validatedUnitPrice).length > 0) {
           validatedItem.unitPrice = validatedUnitPrice;
@@ -365,7 +406,8 @@ export class LexwareValidator {
         `lineItems[${index}].discountPercentage`,
         { min: 0, max: 100 }
       );
-      if (discountPercentage !== undefined) validatedItem.discountPercentage = discountPercentage;
+      if (discountPercentage !== undefined)
+        validatedItem.discountPercentage = discountPercentage;
 
       // Line item amount
       const lineItemAmount = this.validateNumber(
@@ -373,7 +415,8 @@ export class LexwareValidator {
         `lineItems[${index}].lineItemAmount`,
         { min: 0 }
       );
-      if (lineItemAmount !== undefined) validatedItem.lineItemAmount = lineItemAmount;
+      if (lineItemAmount !== undefined)
+        validatedItem.lineItemAmount = lineItemAmount;
 
       return validatedItem;
     });
@@ -382,7 +425,9 @@ export class LexwareValidator {
   /**
    * Validates total price object
    */
-  validateTotalPrice(totalPrice: IDataObject | undefined): IDataObject | undefined {
+  validateTotalPrice(
+    totalPrice: IDataObject | undefined
+  ): IDataObject | undefined {
     if (!totalPrice || Object.keys(totalPrice).length === 0) {
       return undefined;
     }
@@ -403,7 +448,9 @@ export class LexwareValidator {
   /**
    * Validates tax conditions object
    */
-  validateTaxConditions(taxConditions: IDataObject | undefined): IDataObject | undefined {
+  validateTaxConditions(
+    taxConditions: IDataObject | undefined
+  ): IDataObject | undefined {
     if (!taxConditions || Object.keys(taxConditions).length === 0) {
       return undefined;
     }
@@ -429,7 +476,9 @@ export class LexwareValidator {
     );
     if (taxTypeNote) validatedTaxConditions.taxTypeNote = taxTypeNote;
 
-    return Object.keys(validatedTaxConditions).length > 0 ? validatedTaxConditions : undefined;
+    return Object.keys(validatedTaxConditions).length > 0
+      ? validatedTaxConditions
+      : undefined;
   }
 
   /**
@@ -437,7 +486,7 @@ export class LexwareValidator {
    */
   createCleanBody(body: IDataObject): IDataObject {
     const cleanBody: IDataObject = {};
-    
+
     Object.entries(body).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         // For objects, check if they have any properties
