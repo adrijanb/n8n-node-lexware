@@ -1,32 +1,5 @@
 import { IDataObject } from "n8n-workflow";
 
-/**
- * Calculate net and gross amounts based on price type and tax rate
- */
-function calculatePriceAmounts(
-  priceAmount: number,
-  taxRatePercentage: number,
-  priceType: string
-): { netAmount: number; grossAmount: number } {
-  if (priceType === "net") {
-    // Price is net, calculate gross
-    const netAmount = priceAmount;
-    const grossAmount = netAmount * (1 + taxRatePercentage / 100);
-    return {
-      netAmount: Math.round(netAmount * 100) / 100, // Round to 2 decimal places
-      grossAmount: Math.round(grossAmount * 100) / 100,
-    };
-  } else {
-    // Price is gross, calculate net
-    const grossAmount = priceAmount;
-    const netAmount = grossAmount / (1 + taxRatePercentage / 100);
-    return {
-      netAmount: Math.round(netAmount * 100) / 100, // Round to 2 decimal places
-      grossAmount: Math.round(grossAmount * 100) / 100,
-    };
-  }
-}
-
 export function parseLineItemsFromCollection(
   rawItems: IDataObject[] = []
 ): IDataObject[] {
@@ -56,12 +29,14 @@ export function parseLineItemsFromCollection(
             netAmount: Math.round(priceAmount * 100) / 100,
             taxRatePercentage,
           };
+
         } else {
           unitPrice = {
             currency,
             grossAmount: Math.round(priceAmount * 100) / 100,
             taxRatePercentage,
           };
+
         }
       } else {
         // Fallback to old structure for backward compatibility
@@ -71,24 +46,7 @@ export function parseLineItemsFromCollection(
           grossAmount: unitPriceValue.grossAmount,
           taxRatePercentage,
         };
-      }
-    }
 
-    // Parse subItems from fixedCollection format
-    let subItems: IDataObject[] = [];
-    if (it?.subItems && typeof it.subItems === "object") {
-      const subItemsCollection = (it.subItems as IDataObject)
-        ?.subItem as IDataObject[];
-      if (Array.isArray(subItemsCollection)) {
-        subItems = subItemsCollection.map((subItem) => ({
-          type: subItem.type || "custom",
-          name: subItem.name,
-          description: subItem.description,
-          quantity: subItem.quantity,
-          unitName: subItem.unitName,
-          alternative: subItem.alternative || false,
-          optional: subItem.optional || false,
-        }));
       }
     }
 
@@ -108,9 +66,6 @@ export function parseLineItemsFromCollection(
     }
     if (it?.optional !== undefined) {
       lineItem.optional = it.optional;
-    }
-    if (subItems.length > 0) {
-      lineItem.subItems = subItems;
     }
 
     return lineItem;

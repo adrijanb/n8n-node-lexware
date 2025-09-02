@@ -220,12 +220,11 @@ export const quotationsFields: INodeProperties[] = [
             type: "options",
             options: [
               { name: "Custom", value: "custom" },
-              { name: "Material", value: "material" },
-              { name: "Service", value: "service" },
               { name: "Text", value: "text" },
             ],
             default: "custom",
-            description: "Type of line item according to Lexware API specification",
+            description:
+              "Type of line item according to Lexware API specification",
           },
           { displayName: "Name", name: "name", type: "string", default: "" },
           {
@@ -279,14 +278,16 @@ export const quotationsFields: INodeProperties[] = [
                       { name: "Gross Price (including tax)", value: "gross" },
                     ],
                     default: "net",
-                    description: "Whether the entered price includes or excludes tax",
+                    description:
+                      "Whether the entered price includes or excludes tax",
                   },
                   {
                     displayName: "Price Amount",
                     name: "priceAmount",
                     type: "number",
                     default: 0,
-                    description: "The price amount (net or gross depending on selection above)",
+                    description:
+                      "The price amount (net or gross depending on selection above)",
                   },
                   {
                     displayName: "Tax Rate %",
@@ -304,64 +305,6 @@ export const quotationsFields: INodeProperties[] = [
             name: "discountPercentage",
             type: "number",
             default: 0,
-          },
-          {
-            displayName: "Alternative",
-            name: "alternative",
-            type: "boolean",
-            default: false,
-            description: "Whether this line item is an alternative option",
-          },
-          {
-            displayName: "Optional",
-            name: "optional",
-            type: "boolean", 
-            default: false,
-            description: "Whether this line item is optional",
-          },
-          {
-            displayName: "Sub Items",
-            name: "subItems",
-            type: "fixedCollection",
-            typeOptions: { multipleValues: true },
-            default: {},
-            description: "Sub-items for nested line items (alternatives, optional items)",
-            options: [
-              {
-                name: "subItem",
-                displayName: "Sub Item",
-                values: [
-                  {
-                    displayName: "Type",
-                    name: "type",
-                    type: "options",
-                    options: [
-                      { name: "Custom", value: "custom" },
-                      { name: "Material", value: "material" },
-                      { name: "Service", value: "service" },
-                      { name: "Text", value: "text" },
-                    ],
-                    default: "custom",
-                  },
-                  { displayName: "Name", name: "name", type: "string", default: "" },
-                  { displayName: "Description", name: "description", type: "string", default: "" },
-                  { displayName: "Quantity", name: "quantity", type: "number", default: 1 },
-                  { displayName: "Unit Name", name: "unitName", type: "string", default: "" },
-                  {
-                    displayName: "Alternative",
-                    name: "alternative",
-                    type: "boolean",
-                    default: false,
-                  },
-                  {
-                    displayName: "Optional",
-                    name: "optional",
-                    type: "boolean",
-                    default: false,
-                  },
-                ],
-              },
-            ],
           },
         ],
       },

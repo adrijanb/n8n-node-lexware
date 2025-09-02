@@ -394,8 +394,9 @@ export class LexwareValidator {
               validatedUnitPrice.netAmount = Math.round(netAmount * 100) / 100;
             } else {
               grossAmount = priceAmount;
-              // For gross price, only include grossAmount in API request  
-              validatedUnitPrice.grossAmount = Math.round(grossAmount * 100) / 100;
+              // For gross price, only include grossAmount in API request
+              validatedUnitPrice.grossAmount =
+                Math.round(grossAmount * 100) / 100;
             }
 
             validatedUnitPrice.taxRatePercentage = taxRatePercentage;

@@ -205,12 +205,6 @@ export const invoicesFields: INodeProperties[] = [
             type: "number",
             default: 0,
           },
-          {
-            displayName: "Line Item Amount",
-            name: "lineItemAmount",
-            type: "number",
-            default: 0,
-          },
         ],
       },
     ],
