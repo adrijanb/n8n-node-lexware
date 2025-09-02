@@ -28,18 +28,13 @@ export class LexwareValidator {
     if (!value || value.trim() === "") {
       if (options.required) {
         const errorMessage = LexwareErrorHandler.formatValidationError(
-          fieldName, 
-          value, 
-          'is required and cannot be empty'
+          fieldName,
+          value,
+          "is required and cannot be empty"
         );
-        throw new NodeOperationError(
-          this.context.getNode(),
-          errorMessage,
-          {
-            description: `Please provide a valid value for ${fieldName}`,
-
-          }
-        );
+        throw new NodeOperationError(this.context.getNode(), errorMessage, {
+          description: `Please provide a valid value for ${fieldName}`,
+        });
       }
       return undefined;
     }
@@ -48,50 +43,35 @@ export class LexwareValidator {
 
     if (options.minLength && trimmed.length < options.minLength) {
       const errorMessage = LexwareErrorHandler.formatValidationError(
-        fieldName, 
-        value, 
+        fieldName,
+        value,
         `must be at least ${options.minLength} characters long (current: ${trimmed.length})`
       );
-      throw new NodeOperationError(
-        this.context.getNode(),
-        errorMessage,
-        {
-          description: `Please provide a longer value for ${fieldName}`,
-
-        }
-      );
+      throw new NodeOperationError(this.context.getNode(), errorMessage, {
+        description: `Please provide a longer value for ${fieldName}`,
+      });
     }
 
     if (options.maxLength && trimmed.length > options.maxLength) {
       const errorMessage = LexwareErrorHandler.formatValidationError(
-        fieldName, 
-        value, 
+        fieldName,
+        value,
         `cannot be longer than ${options.maxLength} characters (current: ${trimmed.length})`
       );
-      throw new NodeOperationError(
-        this.context.getNode(),
-        errorMessage,
-        {
-          description: `Please provide a shorter value for ${fieldName}`,
-
-        }
-      );
+      throw new NodeOperationError(this.context.getNode(), errorMessage, {
+        description: `Please provide a shorter value for ${fieldName}`,
+      });
     }
 
     if (options.pattern && !options.pattern.test(trimmed)) {
       const errorMessage = LexwareErrorHandler.formatValidationError(
-        fieldName, 
-        value, 
-        'has invalid format'
+        fieldName,
+        value,
+        "has invalid format"
       );
-      throw new NodeOperationError(
-        this.context.getNode(),
-        errorMessage,
-        {
-          description: `Please provide a valid format for ${fieldName}`,
-
-        }
-      );
+      throw new NodeOperationError(this.context.getNode(), errorMessage, {
+        description: `Please provide a valid format for ${fieldName}`,
+      });
     }
 
     return trimmed;

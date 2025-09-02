@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2024-12-19
+
+### 🎯 **Lexware API-Specific Error Handling**
+- **Official API Error Format Support**: Implementiert vollständige Unterstützung für [Lexware API Error Codes](https://developers.lexware.io/docs/#error-codes-regular-error-response)
+  - **Regular Error Response Format**: Strukturierte Behandlung mit `message` und `details` Feldern
+  - **Legacy Error Response Format**: Kompatibilität mit älteren `errors` Array Format
+  - **Authorization Error Format**: Spezifische OAuth 2.0 Fehlerbehandlung (`invalid_token`, `expired_token`, `insufficient_scope`)
+
+### 🔧 **Enhanced API Error Messages**
+- **Complete API Response Display**: Vollständige Lexware API Antwort wird immer angezeigt
+- **Request Details**: URL, Method, Body und Query Parameter für besseres Debugging  
+- **Structured Error Details**: Nummerierte Liste spezifischer Probleme
+- **Format Detection**: Automatische Erkennung von Legacy vs. Regular Error Format
+- **Documentation Links**: Direkte Links zur relevanten Lexware API Dokumentation
+
+### 📚 **Developer Resources**
+- **Rate Limiting Guidance**: Spezifische Hinweise zu Lexware's 2 requests/second Limit
+- **Authentication Help**: Direkte Links zum API Key Management Portal
+- **Solution Suggestions**: Konkrete Lösungsvorschläge für jede Fehlerart
+
+### 🛡️ **Error Categories**
+- **400 Bad Request**: Detaillierte Validierungsfehler mit Feldangaben
+- **401 Unauthorized**: OAuth 2.0 spezifische Authentifizierungsfehler
+- **403 Forbidden**: Berechtigungsprobleme mit Scope-Erklärungen
+- **429 Rate Limit**: Token Bucket Algorithm Empfehlungen
+- **5xx Server Errors**: Temporäre vs. persistente Server-Probleme
+
+---
+
 ## [1.1.2] - 2024-12-19
 
 ### 🆕 **Enhanced Error Handling & Developer Experience**

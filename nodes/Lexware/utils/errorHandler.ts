@@ -18,7 +18,6 @@ export class LexwareErrorHandler {
     // Extract error information
     let statusCode = error.response?.status || error.status || 500;
     let errorData = error.response?.data || error.data || {};
-    let errorMessage = error.message || "Unknown error occurred";
 
     // Handle different types of Lexware API errors
     if (error.response) {
@@ -69,7 +68,8 @@ export class LexwareErrorHandler {
   }
 
   /**
-   * Handles validation errors (400 Bad Request)
+   * Handles validation errors (400 Bad Request) according to Lexware API specification
+   * Reference: https://developers.lexware.io/docs/#error-codes-regular-error-response
    */
   private handleValidationError(
     errorData: any,
@@ -78,51 +78,140 @@ export class LexwareErrorHandler {
   ): never {
     let message = `Validation failed for ${operation} operation on ${resourceType}`;
     let details: string[] = [];
+    let isLegacyFormat = false;
 
-    if (errorData.message) {
-      message = errorData.message;
+    // Handle Lexware API Regular Error Response Format
+    if (errorData.message && errorData.details) {
+      message = `Lexware API Error: ${errorData.message}`;
+
+      // Extract structured validation details
+      if (Array.isArray(errorData.details)) {
+        details = errorData.details.map((detail: any) => {
+          if (typeof detail === "string") return detail;
+          if (detail.field && detail.message)
+            return `${detail.field}: ${detail.message}`;
+          if (detail.path && detail.message)
+            return `${detail.path}: ${detail.message}`;
+          if (detail.code && detail.message)
+            return `Code ${detail.code}: ${detail.message}`;
+          if (detail.violationDescription) return detail.violationDescription;
+          return JSON.stringify(detail);
+        });
+      } else {
+        details.push(String(errorData.details));
+      }
     }
+    // Handle Legacy Error Response Format
+    else if (errorData.errors && Array.isArray(errorData.errors)) {
+      isLegacyFormat = true;
+      message = errorData.message || message;
 
-    // Extract specific validation errors
-    if (errorData.errors && Array.isArray(errorData.errors)) {
       details = errorData.errors.map((err: any) => {
         if (typeof err === "string") return err;
         if (err.field && err.message) return `${err.field}: ${err.message}`;
         if (err.path && err.message) return `${err.path}: ${err.message}`;
+        if (err.code && err.message) return `Code ${err.code}: ${err.message}`;
+        if (err.violationDescription) return err.violationDescription;
         return JSON.stringify(err);
       });
-    } else if (errorData.details) {
-      details = Array.isArray(errorData.details)
-        ? errorData.details.map((detail: any) => String(detail))
-        : [String(errorData.details)];
+    }
+    // Handle simple message format
+    else if (errorData.message) {
+      message = `Lexware API Error: ${errorData.message}`;
     }
 
-    const errorMessage =
-      details.length > 0
-        ? `${message}\n\nValidation errors:\n• ${details.join("\n• ")}`
-        : message;
+    // Build comprehensive error message
+    let errorMessage = message;
+
+    if (details.length > 0) {
+      errorMessage += `\n\n🔍 Specific Issues:`;
+      details.forEach((detail, index) => {
+        errorMessage += `\n  ${index + 1}. ${detail}`;
+      });
+    }
+
+    // Add error format information for developers
+    const formatInfo = isLegacyFormat ? "Legacy Format" : "Regular Format";
+    errorMessage += `\n\n📝 Error Format: ${formatInfo}`;
+
+    // Always include the complete API response for debugging
+    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
+      errorData,
+      null,
+      2
+    )}`;
+
+    // Add reference to Lexware documentation
+    errorMessage += `\n\n📚 Reference: https://developers.lexware.io/docs/#error-codes-regular-error-response`;
 
     throw new NodeOperationError(this.context.getNode(), errorMessage, {
       description:
-        "Please check your input data and ensure all required fields are correctly formatted.",
-      
-
+        "Please check your input data according to the Lexware API validation rules. See the complete API response and documentation reference above for detailed information.",
     });
   }
 
   /**
-   * Handles authentication errors (401 Unauthorized)
+   * Handles authentication errors (401 Unauthorized) according to Lexware API specification
+   * Reference: https://developers.lexware.io/docs/#error-codes-authorization-and-connection-error-responses
    */
   private handleAuthenticationError(errorData: any): never {
-    const message =
-      errorData.message ||
-      "Authentication failed. Please check your API credentials.";
+    let message = "Authentication failed. Please check your API credentials.";
+    let errorDetails = "";
+
+    // Handle Lexware API Authorization Error Response Format
+    if (errorData.error) {
+      errorDetails += `\n🔑 Error Type: ${errorData.error}`;
+
+      if (errorData.error_description) {
+        message = errorData.error_description;
+        errorDetails += `\n📝 Description: ${errorData.error_description}`;
+      }
+
+      // Handle specific OAuth 2.0 error types
+      switch (errorData.error) {
+        case "invalid_token":
+          message = "Invalid API token provided";
+          errorDetails += `\n💡 Solution: Generate a new API token at https://app.lexware.de/addons/public-api`;
+          break;
+        case "expired_token":
+          message = "API token has expired";
+          errorDetails += `\n💡 Solution: Refresh or regenerate your API token`;
+          break;
+        case "insufficient_scope":
+          message = "API token does not have sufficient permissions";
+          errorDetails += `\n💡 Solution: Check your API token scope settings`;
+          break;
+        case "invalid_request":
+          message = "Invalid authentication request format";
+          errorDetails += `\n💡 Solution: Check your Authorization header format`;
+          break;
+        default:
+          errorDetails += `\n💡 Solution: Verify your API token and permissions`;
+      }
+    } else if (errorData.message) {
+      message = errorData.message;
+    }
+
+    // Build comprehensive error message
+    let errorMessage = `🚫 Lexware API Authentication Error: ${message}`;
+    errorMessage += errorDetails;
+
+    // Always include the complete API response for debugging
+    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
+      errorData,
+      null,
+      2
+    )}`;
+
+    // Add reference to Lexware documentation
+    errorMessage += `\n\n📚 Reference: https://developers.lexware.io/docs/#error-codes-authorization-and-connection-error-responses`;
+    errorMessage += `\n🔗 Generate API Key: https://app.lexware.de/addons/public-api`;
 
     throw new NodeApiError(this.context.getNode(), {
       status: 401,
-      message,
+      message: errorMessage,
       description:
-        "Verify that your API token is correct and has not expired. You can generate a new token at https://app.lexware.de/addons/public-api",
+        "Authentication with Lexware API failed. Please check your API token configuration.",
     });
   }
 
@@ -153,7 +242,6 @@ export class LexwareErrorHandler {
     throw new NodeOperationError(this.context.getNode(), message, {
       description:
         "The requested resource does not exist. Please verify the ID is correct.",
-      
     });
   }
 
@@ -172,8 +260,6 @@ export class LexwareErrorHandler {
     throw new NodeOperationError(this.context.getNode(), message, {
       description:
         "The operation conflicts with the current state of the resource. This might be due to concurrent modifications or business rule violations.",
-      
-
     });
   }
 
@@ -202,16 +288,22 @@ export class LexwareErrorHandler {
       });
     }
 
-    const errorMessage =
-      details.length > 0
-        ? `${message}\n\nBusiness logic errors:\n• ${details.join("\n• ")}`
-        : message;
+    let errorMessage = message;
+
+    if (details.length > 0) {
+      errorMessage += `\n\nBusiness logic errors:\n• ${details.join("\n• ")}`;
+    }
+
+    // Always include the complete API response for debugging
+    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
+      errorData,
+      null,
+      2
+    )}`;
 
     throw new NodeOperationError(this.context.getNode(), errorMessage, {
       description:
-        "The request data is valid but violates business rules or constraints.",
-      
-
+        "The request data is valid but violates business rules or constraints. See the complete API response above for detailed information.",
     });
   }
 
@@ -219,17 +311,43 @@ export class LexwareErrorHandler {
    * Handles rate limit errors (429 Too Many Requests)
    */
   private handleRateLimitError(errorData: any): never {
-    const message =
-      errorData.message ||
+    let message =
       "Rate limit exceeded. Too many requests sent in a given amount of time.";
     const retryAfter =
-      errorData.retryAfter || errorData["retry-after"] || "60 seconds";
+      errorData.retryAfter || errorData["retry-after"] || "1 second";
+
+    if (errorData.message) {
+      message = errorData.message;
+    }
+
+    // Build comprehensive error message with Lexware-specific rate limit info
+    let errorMessage = `🚦 Lexware API Rate Limit Exceeded: ${message}`;
+    errorMessage += `\n\n⏱️ Rate Limit Details:`;
+    errorMessage += `\n• Lexware API allows up to 2 requests per second`;
+    errorMessage += `\n• Please wait ${retryAfter} before retrying`;
+    errorMessage += `\n• Consider implementing token bucket algorithm for rate limiting`;
+
+    // Add helpful suggestions
+    errorMessage += `\n\n💡 Solutions:`;
+    errorMessage += `\n• Implement exponential backoff with jitter`;
+    errorMessage += `\n• Use token bucket algorithm on client side`;
+    errorMessage += `\n• Add delays between consecutive API calls`;
+    errorMessage += `\n• Batch operations where possible`;
+
+    // Always include the complete API response for debugging
+    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
+      errorData,
+      null,
+      2
+    )}`;
+
+    // Add reference to Lexware documentation
+    errorMessage += `\n\n📚 Reference: https://developers.lexware.io/docs/#api-rate-limits`;
 
     throw new NodeApiError(this.context.getNode(), {
       status: 429,
-      message: `${message} Please retry after ${retryAfter}.`,
-      description:
-        "The Lexware API has rate limits. Please wait before making additional requests. Consider implementing exponential backoff for retries.",
+      message: errorMessage,
+      description: `Rate limit exceeded. Please retry after ${retryAfter}. The Lexware API allows up to 2 requests per second.`,
     });
   }
 
@@ -251,7 +369,7 @@ export class LexwareErrorHandler {
   /**
    * Handles network errors (no response received)
    */
-  private handleNetworkError(error: any): never {
+  private handleNetworkError(_error: any): never {
     const message = "Network error: Unable to reach Lexware API.";
 
     throw new NodeApiError(this.context.getNode(), {
@@ -259,20 +377,18 @@ export class LexwareErrorHandler {
       message,
       description:
         "Please check your internet connection and verify that the Lexware API is accessible. The issue might be temporary.",
-      
     });
   }
 
   /**
    * Handles request setup errors
    */
-  private handleRequestSetupError(error: any, operation: string): never {
-    const message = `Request setup error during ${operation} operation: ${error.message}`;
+  private handleRequestSetupError(error: any, _operation: string): never {
+    const message = `Request setup error during ${_operation} operation: ${error.message}`;
 
     throw new NodeOperationError(this.context.getNode(), message, {
       description:
         "There was an error setting up the request. This might be due to invalid configuration or malformed parameters.",
-      
     });
   }
 
@@ -293,7 +409,6 @@ export class LexwareErrorHandler {
       status: statusCode,
       message,
       description: `HTTP ${statusCode}: ${message}`,
-
     });
   }
 
