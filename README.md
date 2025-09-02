@@ -20,6 +20,13 @@ npm install n8n-nodes-lexware
 
 ## ✨ Features
 
+### 🆕 **What's New in v1.1.0**
+
+- **Quotations Expiry Date**: Set validity periods for your quotes
+- **Manual Address Support**: Full address handling alternative to contactId
+- **Simplified Total Price**: Only currency required - automatic calculations
+- **Enhanced API Compliance**: Perfect alignment with Lexware API specifications
+
 ### 🏢 **Complete Lexware API Coverage**
 
 - **Articles**: Full CRUD operations with type filtering and pricing management
@@ -27,7 +34,7 @@ npm install n8n-nodes-lexware
 - **Invoices**: Invoice creation, management, and JSON-based line item support
 - **Dunnings**: Dunning management with preceding voucher support and finalization
 - **Order Confirmations**: Complete order confirmation workflow
-- **Quotations**: Quote management with flexible line item handling
+- **Quotations**: Quote management with expiry dates, manual addresses, and flexible line item handling
 - **Voucher Lists**: Voucher list retrieval with status filtering
 - **Vouchers**: Comprehensive voucher management
 - **Print Layouts**: Print layout configuration access
@@ -153,8 +160,30 @@ Create a new Lexware API credential in n8n with the following information:
   - GET `/v1/quotations/{id}`
   - GET `/v1/quotations?page=0`
   - POST `/v1/quotations`
-  - PUT `/v1/quotation/{id}`
+  - PUT `/v1/quotations/{id}`
   - DELETE `/v1/quotations/{id}`
+
+#### New Features (v1.1.0)
+- **Expiry Date Support**: Set quotation validity periods
+- **Manual Address Handling**: Alternative to contactId with full address fields
+- **Simplified Total Price**: Only currency required - amounts calculated automatically
+
+```json
+{
+  "title": "Software Development Quote",
+  "expiryDate": "2024-12-31T23:59:59.000Z",
+  "address": {
+    "name": "Berliner Kindl GmbH",
+    "street": "Jubiläumsweg 25",
+    "city": "Berlin",
+    "zip": "14089",
+    "countryCode": "DE"
+  },
+  "totalPrice": {
+    "currency": "EUR"
+  }
+}
+```
 
 ### Voucher Lists
 
@@ -187,7 +216,7 @@ Create a new Lexware API credential in n8n with the following information:
 | **Invoices**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Status filtering |
 | **Dunnings**            |   ✅   |  ✅  |   ❌   |   ❌   |  ❌  | Finalize, Preceding voucher       |
 | **Order Confirmations** |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Pagination                        |
-| **Quotations**          |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items                   |
+| **Quotations**          |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Expiry dates, Manual addresses |
 | **Voucher Lists**       |   ❌   |  ✅  |   ❌   |   ❌   |  ✅  | Status filtering                  |
 | **Vouchers**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Status filtering                  |
 | **Print Layouts**       |   ❌   |  ❌  |   ❌   |   ❌   |  ✅  | Configuration access              |

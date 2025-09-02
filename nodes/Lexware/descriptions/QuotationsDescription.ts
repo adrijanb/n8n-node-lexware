@@ -111,6 +111,19 @@ export const quotationsFields: INodeProperties[] = [
     default: "",
   },
   {
+    displayName: "Expiry Date",
+    name: "expiryDate",
+    type: "dateTime",
+    displayOptions: {
+      show: {
+        resource: ["quotations"],
+        operation: ["create", "update", "createByJson"],
+      },
+    },
+    default: "",
+    description: "Date until which the quotation is valid",
+  },
+  {
     displayName: "Contact ID",
     name: "contactId",
     type: "string",
@@ -121,7 +134,71 @@ export const quotationsFields: INodeProperties[] = [
       },
     },
     default: "",
-    description: "Recipient contact ID",
+    description: "Recipient contact ID (alternative to manual address)",
+  },
+  {
+    displayName: "Manual Address",
+    name: "manualAddress",
+    type: "fixedCollection",
+    typeOptions: { multipleValues: false },
+    displayOptions: {
+      show: {
+        resource: ["quotations"],
+        operation: ["create", "update", "createByJson"],
+      },
+    },
+    default: {},
+    description: "Manual address data (alternative to contact ID)",
+    options: [
+      {
+        name: "address",
+        displayName: "Address",
+        values: [
+          {
+            displayName: "Name",
+            name: "name",
+            type: "string",
+            default: "",
+            description: "Company or person name",
+          },
+          {
+            displayName: "Supplement",
+            name: "supplement",
+            type: "string",
+            default: "",
+            description: "Address supplement (e.g., department, floor)",
+          },
+          {
+            displayName: "Street",
+            name: "street",
+            type: "string",
+            default: "",
+            description: "Street address",
+          },
+          {
+            displayName: "City",
+            name: "city",
+            type: "string",
+            default: "",
+            description: "City name",
+          },
+          {
+            displayName: "ZIP Code",
+            name: "zip",
+            type: "string",
+            default: "",
+            description: "Postal code",
+          },
+          {
+            displayName: "Country Code",
+            name: "countryCode",
+            type: "string",
+            default: "DE",
+            description: "ISO country code (e.g., DE, AT, CH)",
+          },
+        ],
+      },
+    ],
   },
   {
     displayName: "Line Items",
@@ -233,6 +310,8 @@ export const quotationsFields: INodeProperties[] = [
       },
     },
     default: {},
+    description:
+      "Only currency is required - amounts are calculated automatically by Lexware",
     options: [
       {
         name: "value",
@@ -243,24 +322,7 @@ export const quotationsFields: INodeProperties[] = [
             name: "currency",
             type: "string",
             default: "EUR",
-          },
-          {
-            displayName: "Total Net Amount",
-            name: "totalNetAmount",
-            type: "number",
-            default: 0,
-          },
-          {
-            displayName: "Total Gross Amount",
-            name: "totalGrossAmount",
-            type: "number",
-            default: 0,
-          },
-          {
-            displayName: "Total Tax Amount",
-            name: "totalTaxAmount",
-            type: "number",
-            default: 0,
+            description: "Currency code (e.g., EUR, USD, CHF)",
           },
         ],
       },

@@ -150,6 +150,52 @@ export interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
+export interface Quotation {
+  id?: string;
+  title?: string;
+  introduction?: string;
+  remark?: string;
+  voucherDate?: string;
+  expiryDate?: string;
+  address?: {
+    contactId?: string;
+    name?: string;
+    supplement?: string;
+    street?: string;
+    city?: string;
+    zip?: string;
+    countryCode?: string;
+  };
+  lineItems?: Array<{
+    id?: string | null;
+    type?: "custom" | "text";
+    name?: string;
+    description?: string | null;
+    quantity?: number;
+    unitName?: string;
+    unitPrice?: {
+      currency?: string;
+      netAmount?: number;
+      grossAmount?: number;
+      taxRatePercentage?: number;
+    };
+    discountPercentage?: number;
+    lineItemAmount?: number;
+  }>;
+  totalPrice?: {
+    currency?: string;
+    totalNetAmount?: number;
+    totalGrossAmount?: number;
+    totalTaxAmount?: number;
+  };
+  taxConditions?: {
+    taxType?: "net" | "gross";
+    taxTypeNote?: string;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface ErrorResponse {
   error: string;
   message: string;

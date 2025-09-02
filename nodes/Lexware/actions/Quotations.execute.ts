@@ -28,7 +28,14 @@ export async function executeQuotations(
       ) as string;
       const remark = this.getNodeParameter("remark", i, "") as string;
       const voucherDate = this.getNodeParameter("voucherDate", i, "") as string;
+      const expiryDate = this.getNodeParameter("expiryDate", i, "") as string;
       const contactId = this.getNodeParameter("contactId", i, "") as string;
+      const manualAddressRaw =
+        (this.getNodeParameter(
+          "manualAddress.address",
+          i,
+          {}
+        ) as IDataObject) || {};
       const lineItemsRaw =
         (this.getNodeParameter("lineItems.item", i, []) as IDataObject[]) || [];
       const totalPriceRaw =
@@ -37,15 +44,36 @@ export async function executeQuotations(
         (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
         {};
 
+      // Build address object - prefer contactId, fallback to manual address
+      let address: IDataObject | undefined;
+      if (contactId) {
+        address = { contactId };
+      } else if (Object.keys(manualAddressRaw).length > 0) {
+        address = {
+          name: manualAddressRaw.name || undefined,
+          supplement: manualAddressRaw.supplement || undefined,
+          street: manualAddressRaw.street || undefined,
+          city: manualAddressRaw.city || undefined,
+          zip: manualAddressRaw.zip || undefined,
+          countryCode: manualAddressRaw.countryCode || undefined,
+        };
+        // Remove undefined values
+        address = Object.fromEntries(
+          Object.entries(address).filter(([_, value]) => value !== undefined)
+        );
+      }
+
       const body: IDataObject = {
         title: title || undefined,
         introduction: introduction || undefined,
         remark: remark || undefined,
         voucherDate: voucherDate || undefined,
-        address: contactId ? { contactId } : undefined,
+        expiryDate: expiryDate || undefined,
+        address: address,
         lineItems: parseLineItemsFromCollection(lineItemsRaw),
-        totalPrice:
-          Object.keys(totalPriceRaw).length > 0 ? totalPriceRaw : undefined,
+        totalPrice: totalPriceRaw.currency
+          ? { currency: totalPriceRaw.currency }
+          : undefined,
         taxConditions:
           Object.keys(taxConditionsRaw).length > 0
             ? taxConditionsRaw
@@ -68,7 +96,14 @@ export async function executeQuotations(
       ) as string;
       const remark = this.getNodeParameter("remark", i, "") as string;
       const voucherDate = this.getNodeParameter("voucherDate", i, "") as string;
+      const expiryDate = this.getNodeParameter("expiryDate", i, "") as string;
       const contactId = this.getNodeParameter("contactId", i, "") as string;
+      const manualAddressRaw =
+        (this.getNodeParameter(
+          "manualAddress.address",
+          i,
+          {}
+        ) as IDataObject) || {};
       const lineItemsJson = this.getNodeParameter(
         "lineItemsJson",
         i,
@@ -80,15 +115,36 @@ export async function executeQuotations(
         (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
         {};
 
+      // Build address object - prefer contactId, fallback to manual address
+      let address: IDataObject | undefined;
+      if (contactId) {
+        address = { contactId };
+      } else if (Object.keys(manualAddressRaw).length > 0) {
+        address = {
+          name: manualAddressRaw.name || undefined,
+          supplement: manualAddressRaw.supplement || undefined,
+          street: manualAddressRaw.street || undefined,
+          city: manualAddressRaw.city || undefined,
+          zip: manualAddressRaw.zip || undefined,
+          countryCode: manualAddressRaw.countryCode || undefined,
+        };
+        // Remove undefined values
+        address = Object.fromEntries(
+          Object.entries(address).filter(([_, value]) => value !== undefined)
+        );
+      }
+
       const body: IDataObject = {
         title: title || undefined,
         introduction: introduction || undefined,
         remark: remark || undefined,
         voucherDate: voucherDate || undefined,
-        address: contactId ? { contactId } : undefined,
+        expiryDate: expiryDate || undefined,
+        address: address,
         lineItems: parseLineItemsFromJson(lineItemsJson),
-        totalPrice:
-          Object.keys(totalPriceRaw).length > 0 ? totalPriceRaw : undefined,
+        totalPrice: totalPriceRaw.currency
+          ? { currency: totalPriceRaw.currency }
+          : undefined,
         taxConditions:
           Object.keys(taxConditionsRaw).length > 0
             ? taxConditionsRaw
@@ -124,11 +180,69 @@ export async function executeQuotations(
     }
     case "update": {
       const id = this.getNodeParameter("quotationId", i) as string;
-      const body = this.getNodeParameter("quotation", i) as IDataObject;
+      const title = this.getNodeParameter("title", i, "") as string;
+      const introduction = this.getNodeParameter(
+        "introduction",
+        i,
+        ""
+      ) as string;
+      const remark = this.getNodeParameter("remark", i, "") as string;
+      const voucherDate = this.getNodeParameter("voucherDate", i, "") as string;
+      const expiryDate = this.getNodeParameter("expiryDate", i, "") as string;
+      const contactId = this.getNodeParameter("contactId", i, "") as string;
+      const manualAddressRaw =
+        (this.getNodeParameter(
+          "manualAddress.address",
+          i,
+          {}
+        ) as IDataObject) || {};
+      const lineItemsRaw =
+        (this.getNodeParameter("lineItems.item", i, []) as IDataObject[]) || [];
+      const totalPriceRaw =
+        (this.getNodeParameter("totalPrice.value", i, {}) as IDataObject) || {};
+      const taxConditionsRaw =
+        (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
+        {};
+
+      // Build address object - prefer contactId, fallback to manual address
+      let address: IDataObject | undefined;
+      if (contactId) {
+        address = { contactId };
+      } else if (Object.keys(manualAddressRaw).length > 0) {
+        address = {
+          name: manualAddressRaw.name || undefined,
+          supplement: manualAddressRaw.supplement || undefined,
+          street: manualAddressRaw.street || undefined,
+          city: manualAddressRaw.city || undefined,
+          zip: manualAddressRaw.zip || undefined,
+          countryCode: manualAddressRaw.countryCode || undefined,
+        };
+        // Remove undefined values
+        address = Object.fromEntries(
+          Object.entries(address).filter(([_, value]) => value !== undefined)
+        );
+      }
+
+      const body: IDataObject = {
+        title: title || undefined,
+        introduction: introduction || undefined,
+        remark: remark || undefined,
+        voucherDate: voucherDate || undefined,
+        expiryDate: expiryDate || undefined,
+        address: address,
+        lineItems: parseLineItemsFromCollection(lineItemsRaw),
+        totalPrice: totalPriceRaw.currency
+          ? { currency: totalPriceRaw.currency }
+          : undefined,
+        taxConditions:
+          Object.keys(taxConditionsRaw).length > 0
+            ? taxConditionsRaw
+            : undefined,
+      };
       responseData = await lexwareApiRequest.call(
         this,
         "PUT",
-        `/v1/quotation/${id}`,
+        `/v1/quotations/${id}`,
         body
       );
       break;
