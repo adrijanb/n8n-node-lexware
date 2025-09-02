@@ -29,14 +29,12 @@ export function parseLineItemsFromCollection(
             netAmount: Math.round(priceAmount * 100) / 100,
             taxRatePercentage,
           };
-
         } else {
           unitPrice = {
             currency,
             grossAmount: Math.round(priceAmount * 100) / 100,
             taxRatePercentage,
           };
-
         }
       } else {
         // Fallback to old structure for backward compatibility
@@ -46,7 +44,6 @@ export function parseLineItemsFromCollection(
           grossAmount: unitPriceValue.grossAmount,
           taxRatePercentage,
         };
-
       }
     }
 
