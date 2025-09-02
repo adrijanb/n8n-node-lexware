@@ -16,7 +16,21 @@ export function parseLineItemsFromCollection(
         }
       : undefined;
 
-    return {
+    // Parse subItems if provided as JSON string
+    let subItems: IDataObject[] = [];
+    if (it?.subItems) {
+      try {
+        if (typeof it.subItems === 'string') {
+          subItems = JSON.parse(it.subItems as string);
+        } else if (Array.isArray(it.subItems)) {
+          subItems = it.subItems as IDataObject[];
+        }
+      } catch (error) {
+        console.warn('Failed to parse subItems JSON:', error);
+      }
+    }
+
+    const lineItem: IDataObject = {
       type: it?.type || "custom",
       name: it?.name,
       description: it?.description,
@@ -25,7 +39,20 @@ export function parseLineItemsFromCollection(
       unitPrice,
       discountPercentage: it?.discountPercentage,
       lineItemAmount: it?.lineItemAmount,
-    } as IDataObject;
+    };
+
+    // Add optional fields only if they are set
+    if (it?.alternative !== undefined) {
+      lineItem.alternative = it.alternative;
+    }
+    if (it?.optional !== undefined) {
+      lineItem.optional = it.optional;
+    }
+    if (subItems.length > 0) {
+      lineItem.subItems = subItems;
+    }
+
+    return lineItem;
   });
 }
 

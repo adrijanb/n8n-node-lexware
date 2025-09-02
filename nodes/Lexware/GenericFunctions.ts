@@ -99,37 +99,53 @@ export async function lexwareApiRequest(
     // Enhanced error handling with complete API response
     const errorData = error.response?.data || error.data || {};
     const statusCode = error.response?.status || error.status || 500;
-    
+
     // Create comprehensive error message with API response
     let errorMessage = `Lexware API Error (${statusCode}) for ${operation} operation on ${resourceType}`;
-    
+
     if (errorData.message) {
       errorMessage += `\n\nAPI Message: ${errorData.message}`;
     }
-    
+
     // Always include the complete API response for debugging
-    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(errorData, null, 2)}`;
-    
+    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
+      errorData,
+      null,
+      2
+    )}`;
+
     // Include request details for better debugging
     errorMessage += `\n\n🔍 Request Details:`;
     errorMessage += `\nURL: ${options.url}`;
     errorMessage += `\nMethod: ${options.method}`;
     if (options.body && Object.keys(options.body).length > 0) {
-      errorMessage += `\nRequest Body: ${JSON.stringify(options.body, null, 2)}`;
+      errorMessage += `\nRequest Body: ${JSON.stringify(
+        options.body,
+        null,
+        2
+      )}`;
     }
     if (options.qs && Object.keys(options.qs).length > 0) {
-      errorMessage += `\nQuery Parameters: ${JSON.stringify(options.qs, null, 2)}`;
+      errorMessage += `\nQuery Parameters: ${JSON.stringify(
+        options.qs,
+        null,
+        2
+      )}`;
     }
-    
+
     const errorHandler = new LexwareErrorHandler(this);
-    return errorHandler.handleApiError({
-      ...error,
-      message: errorMessage,
-      response: {
-        ...error.response,
-        data: errorData
-      }
-    }, operation, resourceType);
+    return errorHandler.handleApiError(
+      {
+        ...error,
+        message: errorMessage,
+        response: {
+          ...error.response,
+          data: errorData,
+        },
+      },
+      operation,
+      resourceType
+    );
   }
 }
 
