@@ -5,32 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 02.09.2025
+
+### 🚀 **Intelligent Price Calculation (Major Feature)**
+- **Smart Price Type Selection**: Dropdown für "Netto" oder "Brutto" Preise
+- **Automatic Calculation**: Automatische Berechnung der jeweils anderen Preiskomponente
+- **User-Friendly Interface**: Nur noch 3 einfache Eingaben erforderlich:
+  - **Price Type**: Netto oder Brutto (Dropdown)
+  - **Price Amount**: Der Preis (nur eine Eingabe!)  
+  - **Tax Rate**: Steuersatz in %
+
+### 🎯 **Enhanced User Experience**
+- **Simplified Workflow**: Keine manuelle Berechnung von Netto/Brutto mehr nötig
+- **Error Prevention**: Eliminiert Berechnungsfehler durch automatische Preisberechnung
+- **Currency Selection**: Dropdown mit häufigsten Währungen (EUR, USD, GBP, CHF)
+- **Precision**: Automatische Rundung auf 2 Dezimalstellen
+
+### 🔧 **Technical Improvements**
+- **Backward Compatibility**: Vollständige Unterstützung der alten Preisstruktur
+- **Smart Validation**: Intelligente Validierung für beide Preisstrukturen
+- **Accurate Calculations**: Präzise Netto/Brutto Berechnungen mit korrekter Rundung
+- **Type Safety**: Robuste TypeScript Typisierung für alle Preisberechnungen
+
+### 📋 **How It Works**
+1. **Select Price Type**: "Net Price (excluding tax)" oder "Gross Price (including tax)"
+2. **Enter Price**: Den bekannten Preis eingeben
+3. **Set Tax Rate**: Steuersatz eingeben (z.B. 19 für 19% MwSt)
+4. **Automatic Magic**: System berechnet automatisch die fehlenden Werte
+
+**Beispiel:**
+- Price Type: "Net Price" 
+- Price Amount: 20.08
+- Tax Rate: 19%
+- **→ System berechnet automatisch Gross Amount: 23.90**
+
+---
+
 ## [1.1.4] - 02.09.2025
 
 ### 🎯 **Complete Line Items Support for Quotations**
+
 - **Extended Line Item Types**: Vollständige Unterstützung für alle [Lexware API Line Item Types](https://developers.lexware.io/docs/#quotations-endpoint-create-a-quotation)
   - **Custom**: Standard benutzerdefinierte Artikel
-  - **Material**: Materialien und Produkte 
+  - **Material**: Materialien und Produkte
   - **Service**: Dienstleistungen
   - **Text**: Reine Textpositionen
 
 ### 🛠️ **Advanced Line Item Features**
+
 - **Alternative Items**: Unterstützung für alternative Positionen (`alternative: true/false`)
 - **Optional Items**: Markierung optionaler Positionen (`optional: true/false`)
 - **Sub Items**: Verschachtelte Line Items für komplexe Produktstrukturen
 - **Complete Unit Price Structure**: Vollständige `unitPrice` Objekt-Unterstützung mit allen Feldern
 
 ### 🔧 **Enhanced Data Processing**
+
 - **JSON Sub Items**: Flexible SubItems Definition über JSON Format
 - **Automatic Field Handling**: Intelligente Verarbeitung optionaler Felder
 - **Error Prevention**: Bessere Validierung verhindert "unit price must not be null" Fehler
 
-### 📋 **Required Fields Compliance** 
+### 📋 **Required Fields Compliance**
+
 Basierend auf der [Lexware API Dokumentation](https://developers.lexware.io/docs/#quotations-endpoint-create-a-quotation):
+
 - **type**: erforderlich (custom, material, service, text)
 - **name**: erforderlich
 - **quantity**: erforderlich für type custom, service, material
-- **unitName**: erforderlich für type custom, service, material  
+- **unitName**: erforderlich für type custom, service, material
 - **unitPrice**: erforderlich für type custom, service, material
   - **currency**: erforderlich
   - **netAmount/grossAmount**: abhängig von taxConditions.taxType

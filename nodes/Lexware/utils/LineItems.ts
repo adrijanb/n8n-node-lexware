@@ -1,5 +1,32 @@
 import { IDataObject } from "n8n-workflow";
 
+/**
+ * Calculate net and gross amounts based on price type and tax rate
+ */
+function calculatePriceAmounts(
+  priceAmount: number,
+  taxRatePercentage: number,
+  priceType: string
+): { netAmount: number; grossAmount: number } {
+  if (priceType === "net") {
+    // Price is net, calculate gross
+    const netAmount = priceAmount;
+    const grossAmount = netAmount * (1 + taxRatePercentage / 100);
+    return {
+      netAmount: Math.round(netAmount * 100) / 100, // Round to 2 decimal places
+      grossAmount: Math.round(grossAmount * 100) / 100,
+    };
+  } else {
+    // Price is gross, calculate net
+    const grossAmount = priceAmount;
+    const netAmount = grossAmount / (1 + taxRatePercentage / 100);
+    return {
+      netAmount: Math.round(netAmount * 100) / 100, // Round to 2 decimal places
+      grossAmount: Math.round(grossAmount * 100) / 100,
+    };
+  }
+}
+
 export function parseLineItemsFromCollection(
   rawItems: IDataObject[] = []
 ): IDataObject[] {
@@ -7,26 +34,55 @@ export function parseLineItemsFromCollection(
     const unitPriceValue = (it?.unitPrice as IDataObject)?.value as
       | IDataObject
       | undefined;
-    const unitPrice = unitPriceValue
-      ? {
-          currency: unitPriceValue.currency,
+
+    let unitPrice: IDataObject | undefined;
+
+    if (unitPriceValue) {
+      const currency = unitPriceValue.currency || "EUR";
+      const taxRatePercentage = Number(unitPriceValue.taxRatePercentage) || 19;
+
+      // Check if we have the new price structure with priceType and priceAmount
+      if (
+        unitPriceValue.priceType &&
+        unitPriceValue.priceAmount !== undefined
+      ) {
+        const priceAmount = Number(unitPriceValue.priceAmount);
+        const priceType = unitPriceValue.priceType as string;
+
+        const { netAmount, grossAmount } = calculatePriceAmounts(
+          priceAmount,
+          taxRatePercentage,
+          priceType
+        );
+
+        unitPrice = {
+          currency,
+          netAmount,
+          grossAmount,
+          taxRatePercentage,
+        };
+      } else {
+        // Fallback to old structure for backward compatibility
+        unitPrice = {
+          currency,
           netAmount: unitPriceValue.netAmount,
           grossAmount: unitPriceValue.grossAmount,
-          taxRatePercentage: unitPriceValue.taxRatePercentage,
-        }
-      : undefined;
+          taxRatePercentage,
+        };
+      }
+    }
 
     // Parse subItems if provided as JSON string
     let subItems: IDataObject[] = [];
     if (it?.subItems) {
       try {
-        if (typeof it.subItems === 'string') {
+        if (typeof it.subItems === "string") {
           subItems = JSON.parse(it.subItems as string);
         } else if (Array.isArray(it.subItems)) {
           subItems = it.subItems as IDataObject[];
         }
       } catch (error) {
-        console.warn('Failed to parse subItems JSON:', error);
+        console.warn("Failed to parse subItems JSON:", error);
       }
     }
 

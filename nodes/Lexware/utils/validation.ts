@@ -301,10 +301,10 @@ export class LexwareValidator {
         `lineItems[${index}].type`,
         { required: true }
       );
-      if (type && !["custom", "text"].includes(type)) {
+      if (type && !["custom", "material", "service", "text"].includes(type)) {
         throw new NodeOperationError(
           this.context.getNode(),
-          `Line item type must be either 'custom' or 'text'`
+          `Line item type must be one of: 'custom', 'material', 'service', 'text'`
         );
       }
       validatedItem.type = type;
@@ -352,28 +352,76 @@ export class LexwareValidator {
         );
         if (currency) validatedUnitPrice.currency = currency;
 
-        const netAmount = this.validateNumber(
-          unitPrice.netAmount as number,
-          `lineItems[${index}].unitPrice.netAmount`,
-          { min: 0 }
-        );
-        if (netAmount !== undefined) validatedUnitPrice.netAmount = netAmount;
+        // Check for new price structure with priceType and priceAmount
+        if (unitPrice.priceType && unitPrice.priceAmount !== undefined) {
+          const priceType = this.validateString(
+            unitPrice.priceType as string,
+            `lineItems[${index}].unitPrice.priceType`,
+            { required: true }
+          );
+          
+          if (priceType && !["net", "gross"].includes(priceType)) {
+            throw new NodeOperationError(
+              this.context.getNode(),
+              `Price type must be either 'net' or 'gross' for lineItems[${index}].unitPrice.priceType`
+            );
+          }
 
-        const grossAmount = this.validateNumber(
-          unitPrice.grossAmount as number,
-          `lineItems[${index}].unitPrice.grossAmount`,
-          { min: 0 }
-        );
-        if (grossAmount !== undefined)
-          validatedUnitPrice.grossAmount = grossAmount;
+          const priceAmount = this.validateNumber(
+            unitPrice.priceAmount as number,
+            `lineItems[${index}].unitPrice.priceAmount`,
+            { min: 0, required: true }
+          );
 
-        const taxRatePercentage = this.validateNumber(
-          unitPrice.taxRatePercentage as number,
-          `lineItems[${index}].unitPrice.taxRatePercentage`,
-          { min: 0, max: 100 }
-        );
-        if (taxRatePercentage !== undefined)
-          validatedUnitPrice.taxRatePercentage = taxRatePercentage;
+          const taxRatePercentage = this.validateNumber(
+            unitPrice.taxRatePercentage as number,
+            `lineItems[${index}].unitPrice.taxRatePercentage`,
+            { min: 0, max: 100, required: true }
+          );
+
+          if (priceType && priceAmount !== undefined && taxRatePercentage !== undefined) {
+            // Calculate net and gross amounts automatically
+            let netAmount: number;
+            let grossAmount: number;
+
+            if (priceType === "net") {
+              netAmount = priceAmount;
+              grossAmount = netAmount * (1 + taxRatePercentage / 100);
+            } else {
+              grossAmount = priceAmount;
+              netAmount = grossAmount / (1 + taxRatePercentage / 100);
+            }
+
+            // Round to 2 decimal places
+            validatedUnitPrice.netAmount = Math.round(netAmount * 100) / 100;
+            validatedUnitPrice.grossAmount = Math.round(grossAmount * 100) / 100;
+            validatedUnitPrice.taxRatePercentage = taxRatePercentage;
+          }
+        } else {
+          // Fallback to old validation for backward compatibility
+          const netAmount = this.validateNumber(
+            unitPrice.netAmount as number,
+            `lineItems[${index}].unitPrice.netAmount`,
+            { min: 0 }
+          );
+          if (netAmount !== undefined) validatedUnitPrice.netAmount = netAmount;
+
+          const grossAmount = this.validateNumber(
+            unitPrice.grossAmount as number,
+            `lineItems[${index}].unitPrice.grossAmount`,
+            { min: 0 }
+          );
+          if (grossAmount !== undefined)
+            validatedUnitPrice.grossAmount = grossAmount;
+
+          const taxRatePercentage = this.validateNumber(
+            unitPrice.taxRatePercentage as number,
+            `lineItems[${index}].unitPrice.taxRatePercentage`,
+            { min: 0, max: 100 }
+          );
+          if (taxRatePercentage !== undefined)
+            validatedUnitPrice.taxRatePercentage = taxRatePercentage;
+        }
 
         if (Object.keys(validatedUnitPrice).length > 0) {
           validatedItem.unitPrice = validatedUnitPrice;
