@@ -55,6 +55,12 @@ export async function executeQuotations(
       const taxConditionsRaw =
         (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
         {};
+      const paymentConditionsRaw =
+        (this.getNodeParameter(
+          "paymentConditions.value",
+          i,
+          {}
+        ) as IDataObject) || {};
 
       // Validate all fields
       const title = validator.validateString(titleRaw, "title", {
@@ -77,6 +83,8 @@ export async function executeQuotations(
       const lineItems = validator.validateLineItems(parsedLineItems);
       const totalPrice = validator.validateTotalPrice(totalPriceRaw);
       const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
+      const paymentConditions =
+        validator.validatePaymentConditions(paymentConditionsRaw);
 
       // Build and clean request body
       const body = validator.createCleanBody({
@@ -89,6 +97,7 @@ export async function executeQuotations(
         lineItems,
         totalPrice,
         taxConditions,
+        paymentConditions,
       });
 
       responseData = await lexwareApiRequest.call(
@@ -136,6 +145,12 @@ export async function executeQuotations(
       const taxConditionsRaw =
         (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
         {};
+      const paymentConditionsRaw =
+        (this.getNodeParameter(
+          "paymentConditions.value",
+          i,
+          {}
+        ) as IDataObject) || {};
 
       // Validate all fields
       const title = validator.validateString(titleRaw, "title", {
@@ -159,6 +174,8 @@ export async function executeQuotations(
 
       const totalPrice = validator.validateTotalPrice(totalPriceRaw);
       const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
+      const paymentConditions =
+        validator.validatePaymentConditions(paymentConditionsRaw);
 
       // Build and clean request body
       const body = validator.createCleanBody({
@@ -171,6 +188,7 @@ export async function executeQuotations(
         lineItems,
         totalPrice,
         taxConditions,
+        paymentConditions,
       });
 
       responseData = await lexwareApiRequest.call(
@@ -263,6 +281,12 @@ export async function executeQuotations(
       const taxConditionsRaw =
         (this.getNodeParameter("taxConditions.value", i, {}) as IDataObject) ||
         {};
+      const paymentConditionsRaw =
+        (this.getNodeParameter(
+          "paymentConditions.value",
+          i,
+          {}
+        ) as IDataObject) || {};
 
       // Validate all fields
       const title = validator.validateString(titleRaw, "title", {
@@ -282,6 +306,8 @@ export async function executeQuotations(
       const lineItems = validator.validateLineItems(lineItemsRaw);
       const totalPrice = validator.validateTotalPrice(totalPriceRaw);
       const taxConditions = validator.validateTaxConditions(taxConditionsRaw);
+      const paymentConditions =
+        validator.validatePaymentConditions(paymentConditionsRaw);
 
       // Build and clean request body
       const body = validator.createCleanBody({
@@ -294,6 +320,7 @@ export async function executeQuotations(
         lineItems: lineItems || parseLineItemsFromCollection(lineItemsRaw),
         totalPrice,
         taxConditions,
+        paymentConditions,
       });
 
       responseData = await lexwareApiRequest.call(

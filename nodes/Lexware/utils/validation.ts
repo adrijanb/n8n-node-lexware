@@ -505,6 +505,65 @@ export class LexwareValidator {
   }
 
   /**
+   * Validates payment conditions
+   */
+  validatePaymentConditions(
+    paymentConditions: IDataObject
+  ): IDataObject | undefined {
+    if (!paymentConditions || Object.keys(paymentConditions).length === 0) {
+      return undefined;
+    }
+
+    const result: IDataObject = {};
+
+    if (paymentConditions.paymentTermLabel) {
+      result.paymentTermLabel = this.validateString(
+        paymentConditions.paymentTermLabel as string,
+        "paymentTermLabel",
+        { maxLength: 255 }
+      );
+    }
+
+    if (paymentConditions.paymentTermDuration !== undefined) {
+      result.paymentTermDuration = this.validateNumber(
+        paymentConditions.paymentTermDuration as number,
+        "paymentTermDuration",
+        { min: 0, integer: true }
+      );
+    }
+
+    // Handle payment discount conditions
+    const discountConditions =
+      paymentConditions.paymentDiscountConditions as IDataObject;
+    if (discountConditions?.value) {
+      const discountValue = discountConditions.value as IDataObject;
+      const discount: IDataObject = {};
+
+      if (discountValue.discountPercentage !== undefined) {
+        discount.discountPercentage = this.validateNumber(
+          discountValue.discountPercentage as number,
+          "discountPercentage",
+          { min: 0, max: 100 }
+        );
+      }
+
+      if (discountValue.discountRange !== undefined) {
+        discount.discountRange = this.validateNumber(
+          discountValue.discountRange as number,
+          "discountRange",
+          { min: 0, integer: true }
+        );
+      }
+
+      if (Object.keys(discount).length > 0) {
+        result.paymentDiscountConditions = discount;
+      }
+    }
+
+    return Object.keys(result).length > 0 ? result : undefined;
+  }
+
+  /**
    * Creates a clean body object with only defined values
    */
   createCleanBody(body: IDataObject): IDataObject {

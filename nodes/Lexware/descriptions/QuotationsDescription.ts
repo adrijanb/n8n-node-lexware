@@ -377,6 +377,72 @@ export const quotationsFields: INodeProperties[] = [
       },
     ],
   },
+  // Payment Conditions
+  {
+    displayName: "Payment Conditions",
+    name: "paymentConditions",
+    type: "fixedCollection",
+    typeOptions: { multipleValues: false },
+    displayOptions: {
+      show: {
+        resource: ["quotations"],
+        operation: ["create", "update", "createByJson"],
+      },
+    },
+    default: {},
+    options: [
+      {
+        name: "value",
+        displayName: "Value",
+        values: [
+          {
+            displayName: "Payment Term Label",
+            name: "paymentTermLabel",
+            type: "string",
+            default: "",
+            description:
+              "Label for payment terms (e.g., '10 Tage - 3 %, 30 Tage netto')",
+          },
+          {
+            displayName: "Payment Term Duration",
+            name: "paymentTermDuration",
+            type: "number",
+            default: 30,
+            description: "Payment term duration in days",
+          },
+          {
+            displayName: "Discount Conditions",
+            name: "paymentDiscountConditions",
+            type: "fixedCollection",
+            typeOptions: { multipleValues: false },
+            default: {},
+            options: [
+              {
+                name: "value",
+                displayName: "Value",
+                values: [
+                  {
+                    displayName: "Discount %",
+                    name: "discountPercentage",
+                    type: "number",
+                    default: 0,
+                    description: "Discount percentage (e.g., 3 for 3%)",
+                  },
+                  {
+                    displayName: "Discount Range (days)",
+                    name: "discountRange",
+                    type: "number",
+                    default: 0,
+                    description: "Number of days for discount eligibility",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   // CreateByJson: raw line items JSON
   {
     displayName: "Line Items JSON",
