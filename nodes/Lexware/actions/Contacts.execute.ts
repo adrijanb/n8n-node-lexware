@@ -74,14 +74,17 @@ function buildCompanyContactBody(
     phoneNumber: p.phoneNumber,
   }));
 
-  const mapAddresses = (arr: IDataObject[]) =>
-    (arr || []).map((a) => ({
+  const mapAddresses = (arr: IDataObject[] | IDataObject | undefined) => {
+    // Ensure we have an array to work with
+    const safeArr = Array.isArray(arr) ? arr : (arr ? [arr] : []);
+    return safeArr.map((a) => ({
       supplement: a.supplement,
       street: a.street,
       zip: a.zip,
       city: a.city,
       countryCode: a.countryCode || "DE",
     }));
+  };
 
   const billing = mapAddresses(
     (getParam("billingAddress.address", i, []) as IDataObject[]) || []
@@ -157,9 +160,11 @@ function buildCompanyContactBody(
     if (!col) return out;
     const keys = ["business", "office", "private", "other"] as const;
     for (const key of keys) {
-      const arr = (col[key] as IDataObject[] | undefined) || [];
+      const rawValue = col[key];
+      // Ensure we have an array to work with
+      const arr = Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : []);
       const values = arr
-        .map((e) => (e.email as string) || "")
+        .map((e) => (typeof e === 'object' && e ? (e.email as string) : String(e)) || "")
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
       if (values.length > 0) (out as any)[key] = values;
@@ -182,9 +187,11 @@ function buildCompanyContactBody(
       "other",
     ] as const;
     for (const key of keys) {
-      const arr = (col[key] as IDataObject[] | undefined) || [];
+      const rawValue = col[key];
+      // Ensure we have an array to work with
+      const arr = Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : []);
       const values = arr
-        .map((e) => (e.number as string) || "")
+        .map((e) => (typeof e === 'object' && e ? (e.number as string) : String(e)) || "")
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
       if (values.length > 0) (out as any)[key] = values;
@@ -216,14 +223,17 @@ function buildPersonContactBody(
   const createAsCustomer = !!getParam("createAsCustomer", i, true);
   const createAsVendor = !!getParam("createAsVendor", i, false);
 
-  const mapAddresses = (arr: IDataObject[]) =>
-    (arr || []).map((a) => ({
+  const mapAddresses = (arr: IDataObject[] | IDataObject | undefined) => {
+    // Ensure we have an array to work with
+    const safeArr = Array.isArray(arr) ? arr : (arr ? [arr] : []);
+    return safeArr.map((a) => ({
       supplement: a.supplement,
       street: a.street,
       zip: a.zip,
       city: a.city,
       countryCode: a.countryCode || "DE",
     }));
+  };
   const billing = mapAddresses(
     (getParam("billingAddress.address", i, []) as IDataObject[]) || []
   );
@@ -271,9 +281,11 @@ function buildPersonContactBody(
     if (!col) return out;
     const keys = ["business", "office", "private", "other"] as const;
     for (const key of keys) {
-      const arr = (col[key] as IDataObject[] | undefined) || [];
+      const rawValue = col[key];
+      // Ensure we have an array to work with
+      const arr = Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : []);
       const values = arr
-        .map((e) => (e.email as string) || "")
+        .map((e) => (typeof e === 'object' && e ? (e.email as string) : String(e)) || "")
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
       if (values.length > 0) (out as any)[key] = values;
@@ -295,9 +307,11 @@ function buildPersonContactBody(
       "other",
     ] as const;
     for (const key of keys) {
-      const arr = (col[key] as IDataObject[] | undefined) || [];
+      const rawValue = col[key];
+      // Ensure we have an array to work with
+      const arr = Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : []);
       const values = arr
-        .map((e) => (e.number as string) || "")
+        .map((e) => (typeof e === 'object' && e ? (e.number as string) : String(e)) || "")
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
       if (values.length > 0) (out as any)[key] = values;
