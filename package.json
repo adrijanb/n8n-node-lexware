@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-lexware",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "N8N nodes for Lexware API integration",
   "keywords": [
     "n8n",
