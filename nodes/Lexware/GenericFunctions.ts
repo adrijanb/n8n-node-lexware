@@ -211,7 +211,29 @@ export async function lexwareApiUpload(
     ...optionOverrides,
   } as IHttpRequestOptions;
 
-  return httpRequestWithBackoff.call(this, options);
+  try {
+    return await httpRequestWithBackoff.call(this, options);
+  } catch (error: any) {
+    const response = error.response ?? {};
+    const errorData =
+      response.data ??
+      response.body ??
+      error.data ??
+      error.body ??
+      {};
+    const errorHandler = new LexwareErrorHandler(this);
+    return errorHandler.handleApiError(
+      {
+        ...error,
+        response: {
+          ...response,
+          data: errorData,
+        },
+      },
+      "upload",
+      "files"
+    );
+  }
 }
 
 // Download binary file, returns full response to access headers

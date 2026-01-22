@@ -19,7 +19,8 @@ export async function executeFiles(
         "binaryPropertyName",
         i
       ) as string;
-      const type = this.getNodeParameter("type", i, "voucher") as string;
+      const typeRaw = this.getNodeParameter("type", i, "voucher") as string;
+      const type = typeRaw.trim().toLowerCase();
 
       const item = this.getInputData()[i];
       if (!item.binary || !item.binary[binaryPropertyName]) {
