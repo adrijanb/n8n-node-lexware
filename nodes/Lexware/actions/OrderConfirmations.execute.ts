@@ -44,18 +44,6 @@ export async function executeOrderConfirmations(
       );
       break;
     }
-    case "update": {
-      const id = this.getNodeParameter("orderConfirmationId", i) as string;
-      const body = this.getNodeParameter("orderConfirmation", i) as IDataObject;
-      // Following the samples pattern, use singular for update if API requires
-      responseData = await lexwareApiRequest.call(
-        this,
-        "PUT",
-        `/v1/order-confirmation/${id}`,
-        body
-      );
-      break;
-    }
     case "delete": {
       const id = this.getNodeParameter("orderConfirmationId", i) as string;
       responseData = await lexwareApiRequest.call(

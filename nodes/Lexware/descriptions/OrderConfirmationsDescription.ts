@@ -31,12 +31,6 @@ export const orderConfirmationsOperations: INodeProperties = {
       description: "Get many order confirmations",
       action: "Get many order confirmations",
     },
-    {
-      name: "Update",
-      value: "update",
-      description: "Update an order confirmation",
-      action: "Update an order confirmation",
-    },
   ],
   default: "getAll",
 };
@@ -50,7 +44,7 @@ export const orderConfirmationsFields: INodeProperties[] = [
     displayOptions: {
       show: {
         resource: ["orderConfirmations"],
-        operation: ["get", "update", "delete"],
+        operation: ["get", "delete"],
       },
     },
     default: "",
@@ -62,7 +56,7 @@ export const orderConfirmationsFields: INodeProperties[] = [
     displayOptions: {
       show: {
         resource: ["orderConfirmations"],
-        operation: ["create", "update"],
+        operation: ["create"],
       },
     },
     default:
