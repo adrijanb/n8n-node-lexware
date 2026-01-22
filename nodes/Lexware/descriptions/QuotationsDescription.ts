@@ -323,7 +323,7 @@ export const quotationsFields: INodeProperties[] = [
     },
     default: {},
     description:
-      "Only currency is required - amounts are calculated automatically by Lexware",
+      "Provide currency and optional total discounts - amounts are calculated automatically by Lexware",
     options: [
       {
         name: "value",
@@ -335,6 +335,20 @@ export const quotationsFields: INodeProperties[] = [
             type: "string",
             default: "EUR",
             description: "Currency code (e.g., EUR, USD, CHF)",
+          },
+          {
+            displayName: "Total Discount (Absolute)",
+            name: "totalDiscountAbsolute",
+            type: "number",
+            default: 0,
+            description: "Optional total discount as absolute value",
+          },
+          {
+            displayName: "Total Discount (%)",
+            name: "totalDiscountPercentage",
+            type: "number",
+            default: 0,
+            description: "Optional total discount as percentage",
           },
         ],
       },

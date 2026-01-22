@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, jest } from "@jest/globals";
 import { IExecuteFunctions } from "n8n-core";
-import { NodeApiError, IHttpRequestOptions } from "n8n-workflow";
+import {
+  NodeApiError,
+  NodeOperationError,
+  IHttpRequestOptions,
+} from "n8n-workflow";
 import {
   lexwareApiRequest,
   lexwareApiRequestAllItems,
@@ -247,7 +251,7 @@ describe("GenericFunctions - Umfassende Tests", () => {
       // Act & Assert
       await expect(
         lexwareApiRequest.call(mockExecuteFunctions, "POST", "/v1/create", {})
-      ).rejects.toThrow(NodeApiError);
+      ).rejects.toThrow(NodeOperationError);
     });
 
     it("sollte String-Fehlermeldungen handhaben", async () => {
@@ -834,7 +838,7 @@ describe("GenericFunctions - Umfassende Tests", () => {
       // Act & Assert
       await expect(
         lexwareApiRequest.call(mockExecuteFunctions, "GET", "/v1/nonexistent")
-      ).rejects.toThrow(NodeApiError);
+      ).rejects.toThrow(NodeOperationError);
 
       // Sollte nicht retried werden
       expect(mockExecuteFunctions.helpers.httpRequest).toHaveBeenCalledTimes(1);

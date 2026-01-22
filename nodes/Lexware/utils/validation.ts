@@ -465,6 +465,24 @@ export class LexwareValidator {
     );
     validatedTotalPrice.currency = currency;
 
+    const totalDiscountAbsolute = this.validateNumber(
+      totalPrice.totalDiscountAbsolute as number,
+      "totalPrice.totalDiscountAbsolute",
+      { min: 0 }
+    );
+    if (totalDiscountAbsolute !== undefined) {
+      validatedTotalPrice.totalDiscountAbsolute = totalDiscountAbsolute;
+    }
+
+    const totalDiscountPercentage = this.validateNumber(
+      totalPrice.totalDiscountPercentage as number,
+      "totalPrice.totalDiscountPercentage",
+      { min: 0, max: 100 }
+    );
+    if (totalDiscountPercentage !== undefined) {
+      validatedTotalPrice.totalDiscountPercentage = totalDiscountPercentage;
+    }
+
     return validatedTotalPrice;
   }
 

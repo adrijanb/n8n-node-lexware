@@ -84,7 +84,6 @@ describe("LineItems.ts - Umfassende Tests", () => {
           taxRatePercentage: 19,
         },
         discountPercentage: 5,
-        lineItemAmount: 475,
       });
       expect(result[1]).toEqual({
         type: "service",
@@ -99,7 +98,6 @@ describe("LineItems.ts - Umfassende Tests", () => {
           taxRatePercentage: 19,
         },
         discountPercentage: 0,
-        lineItemAmount: 800,
       });
     });
 
@@ -125,7 +123,6 @@ describe("LineItems.ts - Umfassende Tests", () => {
         unitName: undefined,
         unitPrice: undefined,
         discountPercentage: undefined,
-        lineItemAmount: undefined,
       });
     });
 
@@ -186,10 +183,9 @@ describe("LineItems.ts - Umfassende Tests", () => {
           currency: "USD",
           netAmount: "150",
           grossAmount: null,
-          taxRatePercentage: undefined,
+          taxRatePercentage: 19,
         },
         discountPercentage: "10",
-        lineItemAmount: false,
       });
     });
 

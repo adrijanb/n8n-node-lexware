@@ -187,6 +187,8 @@ export interface Quotation {
     totalNetAmount?: number;
     totalGrossAmount?: number;
     totalTaxAmount?: number;
+    totalDiscountAbsolute?: number;
+    totalDiscountPercentage?: number;
   };
   taxConditions?: {
     taxType?: "net" | "gross";
