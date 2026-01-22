@@ -432,6 +432,7 @@ export async function executeContacts(
     }
     case "update": {
       const contactId = this.getNodeParameter("contactId", i) as string;
+      const version = this.getNodeParameter("version", i) as number;
       const getParam = (name: string, index?: number, def?: unknown) =>
         (
           this.getNodeParameter as unknown as (
@@ -442,6 +443,9 @@ export async function executeContacts(
         )(name, index, def);
 
       const body = buildCompanyContactBody(this, getParam, i);
+      if (version !== undefined && version !== null) {
+        (body as IDataObject).version = version;
+      }
       responseData = await lexwareApiRequest.call(
         this,
         "PUT",

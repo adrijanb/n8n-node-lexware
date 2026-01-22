@@ -63,6 +63,17 @@ export const contactsFields: INodeProperties[] = [
     },
     default: "",
   },
+  {
+    displayName: "Version",
+    name: "version",
+    type: "number",
+    required: true,
+    displayOptions: {
+      show: { resource: ["contacts"], operation: ["update"] },
+    },
+    default: 0,
+    description: "Current version (revision) from the latest GET response",
+  },
   // Create/Update structured fields
 
   {

@@ -34,6 +34,7 @@ describe("Articles.execute - Umfassende Tests", () => {
         gtin: "1234567890123",
         note: "Test Notiz",
         unitName: "Stück",
+        version: 0,
         price: {
           netPrice: 100,
           grossPrice: 119,
@@ -79,6 +80,7 @@ describe("Articles.execute - Umfassende Tests", () => {
 
       const expectedArticle = {
         type: "PRODUCT",
+        version: 0,
         price: {
           netPrice: 0,
           grossPrice: 0,
@@ -250,6 +252,7 @@ describe("Articles.execute - Umfassende Tests", () => {
       mockExecuteFunctions.getNodeParameter.mockImplementation(
         (param: string, _index?: number, defaultValue?: unknown) => {
           if (param === "articleId") return articleId;
+          if (param === "version") return 1;
           if (param === "title") return "Aktualisierter Titel";
           return defaultValue ?? "";
         }
@@ -258,6 +261,7 @@ describe("Articles.execute - Umfassende Tests", () => {
       const expectedUpdateData = {
         title: "Aktualisierter Titel",
         type: "PRODUCT",
+        version: 1,
         price: {
           netPrice: 0,
           grossPrice: 0,
@@ -274,7 +278,7 @@ describe("Articles.execute - Umfassende Tests", () => {
       // Assert
       expect(lexwareApiRequest).toHaveBeenCalledWith(
         "PUT",
-        `/v1/article/${articleId}`,
+        `/v1/articles/${articleId}`,
         expectedUpdateData
       );
       expect(result).toEqual([{ json: { id: articleId } }]);
@@ -285,6 +289,7 @@ describe("Articles.execute - Umfassende Tests", () => {
       mockExecuteFunctions.getNodeParameter
         .mockReturnValueOnce("123e4567-e89b-12d3-a456-426614174000") // articleId
         .mockImplementation((param: string) => {
+          if (param === "version") return 1;
           if (param === "netPrice") return -50;
           if (param === "grossPrice") return -59.5;
           if (param === "type") return "PRODUCT";

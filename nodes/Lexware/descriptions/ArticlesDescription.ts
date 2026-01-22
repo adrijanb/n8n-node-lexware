@@ -61,6 +61,20 @@ export const articlesFields: INodeProperties[] = [
     default: "",
     description: "ID of the article",
   },
+  {
+    displayName: "Version",
+    name: "version",
+    type: "number",
+    required: true,
+    displayOptions: {
+      show: {
+        resource: ["articles"],
+        operation: ["update"],
+      },
+    },
+    default: 0,
+    description: "Current version (revision) from the latest GET response",
+  },
   // Create/Update structured fields
   {
     displayName: "Title",

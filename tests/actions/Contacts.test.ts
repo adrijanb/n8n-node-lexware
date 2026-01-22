@@ -476,6 +476,7 @@ describe("Contacts.execute - Umfassende Tests", () => {
       const contactId = "contact-123";
       mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
         if (param === "contactId") return contactId;
+        if (param === "version") return 1;
         if (param === "companyName") return "Aktualisierte GmbH";
         if (param === "createAsCustomer") return true;
         return param.includes(".") ? [] : "";
@@ -491,6 +492,7 @@ describe("Contacts.execute - Umfassende Tests", () => {
         "PUT",
         `/v1/contacts/${contactId}`,
         expect.objectContaining({
+          version: 1,
           company: expect.objectContaining({
             name: "Aktualisierte GmbH",
           }),

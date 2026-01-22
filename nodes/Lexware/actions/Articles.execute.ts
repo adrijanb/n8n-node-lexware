@@ -93,6 +93,7 @@ export async function executeArticles(
           ) => unknown
         )(name, index, def);
       const article = buildArticleBody(getParam, i, validator);
+      (article as IDataObject).version = 0;
       responseData = await lexwareApiRequest.call(
         this,
         "POST",
@@ -137,6 +138,7 @@ export async function executeArticles(
         required: true,
         pattern: /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       });
+      const version = this.getNodeParameter("version", i) as number;
       const getParam = (name: string, index?: number, def?: unknown) =>
         (
           this.getNodeParameter as unknown as (
@@ -146,10 +148,13 @@ export async function executeArticles(
           ) => unknown
         )(name, index, def);
       const article = buildArticleBody(getParam, i, validator);
+      if (version !== undefined && version !== null) {
+        (article as IDataObject).version = version;
+      }
       responseData = await lexwareApiRequest.call(
         this,
         "PUT",
-        `/v1/article/${articleId}`,
+        `/v1/articles/${articleId}`,
         article
       );
       break;

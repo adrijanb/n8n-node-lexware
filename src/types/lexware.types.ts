@@ -12,6 +12,7 @@ export interface ArticlePrice {
 
 export interface Article {
   id?: string;
+  version?: number;
   title?: string;
   description?: string;
   type?: "PRODUCT" | "SERVICE";
@@ -26,6 +27,7 @@ export interface Article {
 
 export interface Contact {
   id?: string;
+  version?: number;
   roles?: {
     customer?: Record<string, unknown>;
     vendor?: Record<string, unknown>;
