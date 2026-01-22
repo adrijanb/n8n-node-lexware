@@ -97,8 +97,19 @@ export async function lexwareApiRequest(
     return await httpRequestWithBackoff.call(this, options);
   } catch (error: any) {
     // Enhanced error handling with complete API response
-    const errorData = error.response?.data || error.data || {};
-    const statusCode = error.response?.status || error.status || 500;
+    const response = error.response ?? {};
+    const errorData =
+      response.data ??
+      response.body ??
+      error.data ??
+      error.body ??
+      {};
+    const statusCode =
+      response.status ??
+      response.statusCode ??
+      error.status ??
+      error.statusCode ??
+      500;
 
     // Create comprehensive error message with API response
     let errorMessage = `Lexware API Error (${statusCode}) for ${operation} operation on ${resourceType}`;

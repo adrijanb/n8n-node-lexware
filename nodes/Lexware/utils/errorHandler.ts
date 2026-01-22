@@ -16,18 +16,32 @@ export class LexwareErrorHandler {
    */
   handleApiError(error: any, operation: string, resourceType: string): never {
     // Extract error information
-    let statusCode = error.response?.status || error.status || 500;
-    let errorData = error.response?.data || error.data || {};
+    let statusCode =
+      error.response?.status ||
+      error.response?.statusCode ||
+      error.status ||
+      error.statusCode ||
+      500;
+    let errorData =
+      error.response?.data ||
+      error.response?.body ||
+      error.data ||
+      error.body ||
+      {};
 
     // Handle different types of Lexware API errors
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      statusCode = error.response.status;
-      errorData = error.response.data || {};
+      statusCode =
+        error.response.status ||
+        error.response.statusCode ||
+        statusCode;
+      errorData = error.response.data || error.response.body || errorData;
 
       switch (statusCode) {
         case 400:
+        case 406:
           return this.handleValidationError(errorData, operation, resourceType);
         case 401:
           return this.handleAuthenticationError(errorData);
@@ -80,23 +94,31 @@ export class LexwareErrorHandler {
     let details: string[] = [];
     let isLegacyFormat = false;
 
+    const normalizeDetail = (detail: any): string => {
+      if (typeof detail === "string") return detail;
+      if (detail?.field && detail?.message)
+        return `${detail.field}: ${detail.message}`;
+      if (detail?.path && detail?.message)
+        return `${detail.path}: ${detail.message}`;
+      if (detail?.code && detail?.message)
+        return `Code ${detail.code}: ${detail.message}`;
+      if (detail?.violationDescription) return detail.violationDescription;
+      return JSON.stringify(detail);
+    };
+
+    if (typeof errorData === "string") {
+      message = `Lexware API Error: ${errorData}`;
+    } else if (Array.isArray(errorData)) {
+      details = errorData.map(normalizeDetail);
+    }
+
     // Handle Lexware API Regular Error Response Format
     if (errorData.message && errorData.details) {
       message = `Lexware API Error: ${errorData.message}`;
 
       // Extract structured validation details
       if (Array.isArray(errorData.details)) {
-        details = errorData.details.map((detail: any) => {
-          if (typeof detail === "string") return detail;
-          if (detail.field && detail.message)
-            return `${detail.field}: ${detail.message}`;
-          if (detail.path && detail.message)
-            return `${detail.path}: ${detail.message}`;
-          if (detail.code && detail.message)
-            return `Code ${detail.code}: ${detail.message}`;
-          if (detail.violationDescription) return detail.violationDescription;
-          return JSON.stringify(detail);
-        });
+        details = errorData.details.map(normalizeDetail);
       } else {
         details.push(String(errorData.details));
       }
@@ -106,18 +128,35 @@ export class LexwareErrorHandler {
       isLegacyFormat = true;
       message = errorData.message || message;
 
-      details = errorData.errors.map((err: any) => {
-        if (typeof err === "string") return err;
-        if (err.field && err.message) return `${err.field}: ${err.message}`;
-        if (err.path && err.message) return `${err.path}: ${err.message}`;
-        if (err.code && err.message) return `Code ${err.code}: ${err.message}`;
-        if (err.violationDescription) return err.violationDescription;
-        return JSON.stringify(err);
-      });
+      details = errorData.errors.map(normalizeDetail);
+    }
+    // Handle legacy errors as key-value map
+    else if (
+      errorData.errors &&
+      typeof errorData.errors === "object" &&
+      !Array.isArray(errorData.errors)
+    ) {
+      isLegacyFormat = true;
+      message = errorData.message || message;
+      details = Object.entries(errorData.errors).map(
+        ([key, value]) => `${key}: ${normalizeDetail(value)}`
+      );
     }
     // Handle simple message format
     else if (errorData.message) {
       message = `Lexware API Error: ${errorData.message}`;
+    }
+    // Handle alternative validation list formats
+    else if (
+      Array.isArray(errorData.violations) ||
+      Array.isArray(errorData.validationErrors) ||
+      Array.isArray(errorData.invalidParams)
+    ) {
+      const list =
+        errorData.violations ||
+        errorData.validationErrors ||
+        errorData.invalidParams;
+      details = list.map(normalizeDetail);
     }
 
     // Build comprehensive error message
