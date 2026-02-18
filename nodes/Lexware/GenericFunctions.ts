@@ -155,7 +155,8 @@ export async function lexwareApiRequest(
         },
       },
       operation,
-      resourceType
+      resourceType,
+      (options as any).body || (options as any).formData
     );
   }
 }
@@ -232,7 +233,8 @@ export async function lexwareApiUpload(
         },
       },
       "upload",
-      "files"
+      "files",
+      formData
     );
   }
 }

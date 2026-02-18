@@ -14,7 +14,12 @@ export class LexwareErrorHandler {
   /**
    * Handles and formats Lexware API errors for better developer experience
    */
-  handleApiError(error: any, operation: string, resourceType: string): never {
+  handleApiError(
+    error: any,
+    operation: string,
+    resourceType: string,
+    requestData?: any
+  ): never {
     // Extract error information
     let statusCode =
       error.response?.status ||
@@ -42,7 +47,12 @@ export class LexwareErrorHandler {
       switch (statusCode) {
         case 400:
         case 406:
-          return this.handleValidationError(errorData, operation, resourceType);
+          return this.handleValidationError(
+            errorData,
+            operation,
+            resourceType,
+            requestData
+          );
         case 401:
           return this.handleAuthenticationError(errorData);
         case 403:
@@ -55,7 +65,8 @@ export class LexwareErrorHandler {
           return this.handleUnprocessableEntityError(
             errorData,
             operation,
-            resourceType
+            resourceType,
+            requestData
           );
         case 429:
           return this.handleRateLimitError(errorData);
@@ -63,13 +74,14 @@ export class LexwareErrorHandler {
         case 502:
         case 503:
         case 504:
-          return this.handleServerError(errorData, statusCode);
+          return this.handleServerError(errorData, statusCode, requestData);
         default:
           return this.handleGenericError(
             errorData,
             statusCode,
             operation,
-            resourceType
+            resourceType,
+            requestData
           );
       }
     } else if (error.request) {
@@ -88,7 +100,8 @@ export class LexwareErrorHandler {
   private handleValidationError(
     errorData: any,
     operation: string,
-    resourceType: string
+    resourceType: string,
+    requestData?: any
   ): never {
     let message = `Validation failed for ${operation} operation on ${resourceType}`;
     let details: string[] = [];
@@ -175,11 +188,7 @@ export class LexwareErrorHandler {
     errorMessage += `\n\n📝 Error Format: ${formatInfo}`;
 
     // Always include the complete API response for debugging
-    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
-      errorData,
-      null,
-      2
-    )}`;
+    errorMessage += this.formatTransparencyBlock(errorData, requestData);
 
     // Add reference to Lexware documentation
     errorMessage += `\n\n📚 Reference: https://developers.lexware.io/docs/#error-codes-regular-error-response`;
@@ -199,7 +208,7 @@ export class LexwareErrorHandler {
    * Handles authentication errors (401 Unauthorized) according to Lexware API specification
    * Reference: https://developers.lexware.io/docs/#error-codes-authorization-and-connection-error-responses
    */
-  private handleAuthenticationError(errorData: any): never {
+  private handleAuthenticationError(errorData: any, requestData?: any): never {
     let message = "Authentication failed. Please check your API credentials.";
     let errorDetails = "";
 
@@ -265,14 +274,17 @@ export class LexwareErrorHandler {
    */
   private handleAuthorizationError(
     errorData: any,
-    resourceType: string
+    resourceType: string,
+    requestData?: any
   ): never {
     const message =
       errorData.message || `Access denied for ${resourceType} resource.`;
 
+    const extraInfo = this.formatTransparencyBlock(errorData, requestData);
+
     throw new NodeApiError(this.context.getNode(), {
       status: 403,
-      message,
+      message: message + extraInfo,
       description:
         "Your API token does not have sufficient permissions for this operation. Please check your API token scope settings.",
     });
@@ -296,13 +308,16 @@ export class LexwareErrorHandler {
   private handleConflictError(
     errorData: any,
     operation: string,
-    resourceType: string
+    resourceType: string,
+    requestData?: any
   ): never {
     const message =
       errorData.message ||
       `Conflict occurred during ${operation} operation on ${resourceType}.`;
 
-    throw new NodeOperationError(this.context.getNode(), message, {
+    const errorMessage = message + this.formatTransparencyBlock(errorData, requestData);
+
+    throw new NodeOperationError(this.context.getNode(), errorMessage, {
       description:
         "The operation conflicts with the current state of the resource. This might be due to concurrent modifications or business rule violations.",
     });
@@ -314,7 +329,8 @@ export class LexwareErrorHandler {
   private handleUnprocessableEntityError(
     errorData: any,
     operation: string,
-    resourceType: string
+    resourceType: string,
+    requestData?: any
   ): never {
     let message = `Unable to process ${operation} operation on ${resourceType}`;
     let details: string[] = [];
@@ -355,7 +371,7 @@ export class LexwareErrorHandler {
   /**
    * Handles rate limit errors (429 Too Many Requests)
    */
-  private handleRateLimitError(errorData: any): never {
+  private handleRateLimitError(errorData: any, requestData?: any): never {
     let message =
       "Rate limit exceeded. Too many requests sent in a given amount of time.";
     const retryAfter =
@@ -399,13 +415,19 @@ export class LexwareErrorHandler {
   /**
    * Handles server errors (5xx)
    */
-  private handleServerError(errorData: any, statusCode: number): never {
+  private handleServerError(
+    errorData: any,
+    statusCode: number,
+    requestData?: any
+  ): never {
     const message =
       errorData.message || "Internal server error occurred on Lexware API.";
 
+    const extraInfo = this.formatTransparencyBlock(errorData, requestData);
+
     throw new NodeApiError(this.context.getNode(), {
       status: statusCode,
-      message,
+      message: message + extraInfo,
       description:
         "This is a temporary server-side issue. Please try again later. If the problem persists, contact Lexware support.",
     });
@@ -444,15 +466,18 @@ export class LexwareErrorHandler {
     errorData: any,
     statusCode: number,
     operation: string,
-    resourceType: string
+    resourceType: string,
+    requestData?: any
   ): never {
     const message =
       errorData.message ||
       `Unexpected error during ${operation} operation on ${resourceType}.`;
 
+    const extraInfo = this.formatTransparencyBlock(errorData, requestData);
+
     throw new NodeApiError(this.context.getNode(), {
       status: statusCode,
-      message,
+      message: message + extraInfo,
       description: `HTTP ${statusCode}: ${message}`,
     });
   }
@@ -551,5 +576,29 @@ export class LexwareErrorHandler {
     };
 
     return sanitizeObject(sanitized);
+  }
+
+  /**
+   * Formats a transparency block including request and response data
+   */
+  private formatTransparencyBlock(errorData: any, requestData?: any): string {
+    let block = `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+    block += `\n📋 **1:1 Lexware API Response**:\n\`\`\`json\n${JSON.stringify(
+      errorData,
+      null,
+      2
+    )}\n\`\`\``;
+
+    if (requestData) {
+      block += `\n\n📤 **n8n API Request Body**:\n\`\`\`json\n${JSON.stringify(
+        this.context
+          ? LexwareErrorHandler.sanitizeParameters(requestData)
+          : requestData,
+        null,
+        2
+      )}\n\`\`\``;
+    }
+    block += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+    return block;
   }
 }
