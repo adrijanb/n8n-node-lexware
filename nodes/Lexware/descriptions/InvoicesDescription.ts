@@ -24,12 +24,6 @@ export const invoicesOperations: INodeProperties = {
       action: "Create an invoice by JSON",
     },
     {
-      name: "Delete",
-      value: "delete",
-      description: "Delete an invoice",
-      action: "Delete an invoice",
-    },
-    {
       name: "Get",
       value: "get",
       description: "Get an invoice",
@@ -61,7 +55,7 @@ export const invoicesFields: INodeProperties[] = [
     displayOptions: {
       show: {
         resource: ["invoices"],
-        operation: ["get", "update", "delete"],
+        operation: ["get", "update"],
       },
     },
     default: "",

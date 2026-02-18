@@ -256,15 +256,6 @@ export async function executeInvoices(
       );
       break;
     }
-    case "delete": {
-      const invoiceId = this.getNodeParameter("invoiceId", i) as string;
-      responseData = await lexwareApiRequest.call(
-        this,
-        "DELETE",
-        `/v1/invoices/${invoiceId}`
-      );
-      break;
-    }
     default:
       throw new NodeOperationError(
         this.getNode(),
