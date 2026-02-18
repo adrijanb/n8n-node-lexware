@@ -306,13 +306,6 @@ export const quotationsFields: INodeProperties[] = [
             type: "number",
             default: 0,
           },
-          {
-            displayName: "Posting Category ID",
-            name: "postingCategoryId",
-            type: "string",
-            default: "",
-            description: "Required for manual addresses/one-time customers to assign the correct bookkeeping category",
-          },
         ],
       },
     ],

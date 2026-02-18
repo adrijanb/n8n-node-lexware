@@ -43,7 +43,6 @@ function buildInvoiceBody(
         }
         : undefined,
       discountPercentage: it.discountPercentage,
-      postingCategoryId: it.postingCategoryId,
     };
     // lineItemAmount ist optional – nur senden, wenn vorhanden und nicht null
     if (it.lineItemAmount !== null && it.lineItemAmount !== undefined) {
