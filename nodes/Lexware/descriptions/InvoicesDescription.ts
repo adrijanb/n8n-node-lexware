@@ -199,6 +199,13 @@ export const invoicesFields: INodeProperties[] = [
             type: "number",
             default: 0,
           },
+          {
+            displayName: "Posting Category ID",
+            name: "postingCategoryId",
+            type: "string",
+            default: "",
+            description: "Optional ID of the posting category for this line item",
+          },
         ],
       },
     ],

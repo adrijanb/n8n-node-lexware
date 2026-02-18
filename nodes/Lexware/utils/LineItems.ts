@@ -55,6 +55,7 @@ export function parseLineItemsFromCollection(
       unitName: it?.unitName,
       unitPrice,
       discountPercentage: it?.discountPercentage,
+      postingCategoryId: it?.postingCategoryId,
     };
 
     // Add optional fields only if they are set
