@@ -441,6 +441,7 @@ export class LexwareValidator {
       if (discountPercentage !== undefined)
         validatedItem.discountPercentage = discountPercentage;
 
+
       return validatedItem;
     });
   }

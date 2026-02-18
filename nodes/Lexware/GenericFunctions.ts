@@ -206,7 +206,8 @@ export async function lexwareApiUpload(
       Accept: "application/json",
       Authorization: `Bearer ${credentials.accessToken}`,
     } as JsonObject,
-    json: true,
+    // json: true is often problematic with formData in some n8n versions/Axios
+    // n8n will still parse JSON response if Accept: application/json is set
     formData: formData as JsonObject,
     ...optionOverrides,
   } as IHttpRequestOptions;

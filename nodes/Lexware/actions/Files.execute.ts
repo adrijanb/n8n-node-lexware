@@ -35,6 +35,7 @@ export async function executeFiles(
       );
       const metadata = item.binary[binaryPropertyName];
       const formData: IDataObject = {
+        type,
         file: {
           value: binaryData,
           options: {
@@ -42,7 +43,6 @@ export async function executeFiles(
             contentType: metadata.mimeType || "application/octet-stream",
           },
         },
-        type,
       } as unknown as IDataObject;
 
       responseData = await lexwareApiUpload.call(this, "/v1/files", formData);
