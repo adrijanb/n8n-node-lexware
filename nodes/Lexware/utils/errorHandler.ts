@@ -186,7 +186,7 @@ export class LexwareErrorHandler {
 
     // Add specific hints for common misleading Lexware errors
     if (errorMessage.includes("postingCategoryId") && errorMessage.includes("Legen Sie den Kontakt zunächst an")) {
-      errorMessage += "\n\n💡 Tipp: Dieser Fehler deutet darauf hin, dass die 'Contact ID' (Empfänger) ungültig ist oder der Kontakt in Lexware noch nicht angelegt wurde. Bitte prüfen Sie die Contact ID.";
+      errorMessage += "\n\n💡 Tipp: Dieser Fehler deutet darauf hin, dass die Empfänger-Informationen fehlen oder ungültig sind. Bitte stellen Sie sicher, dass entweder eine gültige 'Contact ID' oder eine vollständige 'Manual Address' (mit Name und Land) angegeben ist.";
     }
 
     throw new NodeOperationError(this.context.getNode(), errorMessage, {
