@@ -20,12 +20,13 @@ npm install n8n-nodes-lexware
 
 ## ✨ Features
 
-### 🆕 **What's New in v1.1.0**
+### 🆕 **What's New in v1.2.x**
 
-- **Quotations Expiry Date**: Set validity periods for your quotes
-- **Manual Address Support**: Full address handling alternative to contactId
-- **Simplified Total Price**: Only currency required - automatic calculations
-- **Enhanced API Compliance**: Perfect alignment with Lexware API specifications
+- **Improved Discount Handling**: Fixed issue where simultaneous absolute and percentage discounts (even if 0) caused API errors.
+- **PDF Upload Fix**: Enhanced multipart request handling for reliable PDF and file uploads.
+- **Smart Error Hints**: Added descriptive hints for misleading Lexware API errors (e.g., the infamous `postingCategoryId` error).
+- **Invoices Compliance**: Removed unsupported "Delete" operation for invoices as per Lexware API limitations.
+- **Enhanced Validator**: Robust validation logic for price, discount, and address fields.
 
 ### 🏢 **Complete Lexware API Coverage**
 
@@ -137,7 +138,6 @@ Create a new Lexware API credential in n8n with the following information:
   - GET `/v1/invoices?page=0&status=PAID`
   - POST `/v1/invoices`
   - PUT `/v1/invoice/{id}`
-  - DELETE `/v1/invoices/{id}`
 
 ### Dunnings
 
@@ -213,7 +213,7 @@ Create a new Lexware API credential in n8n with the following information:
 | ----------------------- | :----: | :--: | :----: | :----: | :--: | :-------------------------------- |
 | **Articles**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Type filtering                    |
 | **Contacts**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Company/Person, VAT validation    |
-| **Invoices**            |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Status filtering |
+| **Invoices**            |   ✅   |  ✅  |   ✅   |   ❌   |  ✅  | JSON line items, Status filtering |
 | **Dunnings**            |   ✅   |  ✅  |   ❌   |   ❌   |  ❌  | Finalize, Preceding voucher       |
 | **Order Confirmations** |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | Pagination                        |
 | **Quotations**          |   ✅   |  ✅  |   ✅   |   ✅   |  ✅  | JSON line items, Expiry dates, Manual addresses |
@@ -227,6 +227,7 @@ Create a new Lexware API credential in n8n with the following information:
 
 - **Pagination**: Automatic handling of large result sets
 - **Error Retry**: Built-in retry logic with exponential backoff
+- **Smart Hints**: Specific guidance for misleading API error messages
 - **Rate Limiting**: Automatic handling of API rate limits
 - **VAT Validation**: EU and Swiss VAT ID validation
 - **Date Formatting**: Automatic timezone-aware date conversion
