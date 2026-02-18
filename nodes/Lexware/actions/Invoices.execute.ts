@@ -36,11 +36,11 @@ function buildInvoiceBody(
       unitName: it.unitName,
       unitPrice: unit
         ? {
-            currency: unit.currency,
-            netAmount: unit.netAmount,
-            grossAmount: unit.grossAmount ?? gross,
-            taxRatePercentage: unit.taxRatePercentage,
-          }
+          currency: unit.currency,
+          netAmount: unit.netAmount,
+          grossAmount: unit.grossAmount ?? gross,
+          taxRatePercentage: unit.taxRatePercentage,
+        }
         : undefined,
       discountPercentage: it.discountPercentage,
     };
@@ -61,7 +61,23 @@ function buildInvoiceBody(
   };
   const totalPriceVal = getParam("totalPrice.value", i, {}) as IDataObject;
   if (totalPriceVal && Object.keys(totalPriceVal).length) {
-    (body as IDataObject).totalPrice = totalPriceVal;
+    const cleanedTotalPrice: IDataObject = { ...totalPriceVal };
+
+    // Clean discounts: only one of absolute or percentage can be set, and not both at 0
+    const abs = cleanedTotalPrice.totalDiscountAbsolute as number;
+    const pct = cleanedTotalPrice.totalDiscountPercentage as number;
+
+    if (pct !== undefined && pct > 0) {
+      delete cleanedTotalPrice.totalDiscountAbsolute;
+    } else if (abs !== undefined && abs > 0) {
+      delete cleanedTotalPrice.totalDiscountPercentage;
+    } else {
+      // Both are 0 or undefined - remove both to avoid API error
+      delete cleanedTotalPrice.totalDiscountAbsolute;
+      delete cleanedTotalPrice.totalDiscountPercentage;
+    }
+
+    (body as IDataObject).totalPrice = cleanedTotalPrice;
   } else {
     // Fallback: aus Positionen berechnen
     const currency =
@@ -135,9 +151,9 @@ function buildInvoiceBody(
       paymentTermDuration: paymentConditionsVal.paymentTermDuration,
       paymentDiscountConditions: discount
         ? {
-            discountPercentage: discount.discountPercentage,
-            discountRange: discount.discountRange,
-          }
+          discountPercentage: discount.discountPercentage,
+          discountRange: discount.discountRange,
+        }
         : undefined,
     } as IDataObject;
   }

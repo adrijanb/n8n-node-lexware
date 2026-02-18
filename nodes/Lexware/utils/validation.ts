@@ -470,17 +470,19 @@ export class LexwareValidator {
       "totalPrice.totalDiscountAbsolute",
       { min: 0 }
     );
-    if (totalDiscountAbsolute !== undefined) {
-      validatedTotalPrice.totalDiscountAbsolute = totalDiscountAbsolute;
-    }
 
     const totalDiscountPercentage = this.validateNumber(
       totalPrice.totalDiscountPercentage as number,
       "totalPrice.totalDiscountPercentage",
       { min: 0, max: 100 }
     );
-    if (totalDiscountPercentage !== undefined) {
+
+    // Lexware API: "The total discount has to be either absolute or percentage but not both set at the same time!"
+    // We prioritize percentage if it's non-zero. If both are zero, we skip both.
+    if (totalDiscountPercentage !== undefined && totalDiscountPercentage > 0) {
       validatedTotalPrice.totalDiscountPercentage = totalDiscountPercentage;
+    } else if (totalDiscountAbsolute !== undefined && totalDiscountAbsolute > 0) {
+      validatedTotalPrice.totalDiscountAbsolute = totalDiscountAbsolute;
     }
 
     return validatedTotalPrice;
