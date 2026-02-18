@@ -159,6 +159,7 @@ export class LexwareErrorHandler {
       details = list.map(normalizeDetail);
     }
 
+
     // Build comprehensive error message
     let errorMessage = message;
 
@@ -182,6 +183,11 @@ export class LexwareErrorHandler {
 
     // Add reference to Lexware documentation
     errorMessage += `\n\n📚 Reference: https://developers.lexware.io/docs/#error-codes-regular-error-response`;
+
+    // Add specific hints for common misleading Lexware errors
+    if (errorMessage.includes("postingCategoryId") && errorMessage.includes("Legen Sie den Kontakt zunächst an")) {
+      errorMessage += "\n\n💡 Tipp: Dieser Fehler deutet darauf hin, dass die 'Contact ID' (Empfänger) ungültig ist oder der Kontakt in Lexware noch nicht angelegt wurde. Bitte prüfen Sie die Contact ID.";
+    }
 
     throw new NodeOperationError(this.context.getNode(), errorMessage, {
       description:
@@ -478,8 +484,8 @@ export class LexwareErrorHandler {
       value === undefined || value === null
         ? "undefined"
         : typeof value === "string" && value.length > 50
-        ? `"${value.substring(0, 50)}..."`
-        : JSON.stringify(value);
+          ? `"${value.substring(0, 50)}..."`
+          : JSON.stringify(value);
 
     return `Field '${fieldName}' (value: ${valueStr}) ${requirement}`;
   }
