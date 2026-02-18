@@ -208,7 +208,7 @@ export class LexwareErrorHandler {
    * Handles authentication errors (401 Unauthorized) according to Lexware API specification
    * Reference: https://developers.lexware.io/docs/#error-codes-authorization-and-connection-error-responses
    */
-  private handleAuthenticationError(errorData: any, requestData?: any): never {
+  private handleAuthenticationError(errorData: any, _requestData?: any): never {
     let message = "Authentication failed. Please check your API credentials.";
     let errorDetails = "";
 
@@ -356,11 +356,7 @@ export class LexwareErrorHandler {
     }
 
     // Always include the complete API response for debugging
-    errorMessage += `\n\n📋 Complete Lexware API Response:\n${JSON.stringify(
-      errorData,
-      null,
-      2
-    )}`;
+    errorMessage += this.formatTransparencyBlock(errorData, requestData);
 
     throw new NodeOperationError(this.context.getNode(), errorMessage, {
       description:
@@ -371,7 +367,7 @@ export class LexwareErrorHandler {
   /**
    * Handles rate limit errors (429 Too Many Requests)
    */
-  private handleRateLimitError(errorData: any, requestData?: any): never {
+  private handleRateLimitError(errorData: any, _requestData?: any): never {
     let message =
       "Rate limit exceeded. Too many requests sent in a given amount of time.";
     const retryAfter =
