@@ -108,7 +108,68 @@ export const invoicesFields: INodeProperties[] = [
       show: { resource: ["invoices"], operation: ["create", "update"] },
     },
     default: "",
-    description: "Recipient contact ID",
+    description: "Recipient contact ID (alternative to manual address)",
+  },
+  {
+    displayName: "Manual Address",
+    name: "manualAddress",
+    type: "fixedCollection",
+    typeOptions: { multipleValues: false },
+    displayOptions: {
+      show: { resource: ["invoices"], operation: ["create", "update"] },
+    },
+    default: {},
+    description: "Manual address data (alternative to contact ID)",
+    options: [
+      {
+        name: "address",
+        displayName: "Address",
+        values: [
+          {
+            displayName: "Name",
+            name: "name",
+            type: "string",
+            default: "",
+            description: "Company or person name",
+          },
+          {
+            displayName: "Supplement",
+            name: "supplement",
+            type: "string",
+            default: "",
+            description: "Address supplement (e.g., department, floor)",
+          },
+          {
+            displayName: "Street",
+            name: "street",
+            type: "string",
+            default: "",
+            description: "Street address",
+          },
+          {
+            displayName: "City",
+            name: "city",
+            type: "string",
+            default: "",
+            description: "City name",
+          },
+          {
+            displayName: "ZIP Code",
+            name: "zip",
+            type: "string",
+            default: "",
+            description: "Postal code",
+          },
+          {
+            displayName: "Country Code",
+            name: "countryCode",
+            type: "string",
+            default: "DE",
+            description: "ISO country code (e.g., DE, AT, CH)",
+          },
+        ],
+      },
+    ],
   },
   // Line items
   {

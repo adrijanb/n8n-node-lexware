@@ -8,6 +8,38 @@ import { lexwareApiRequest } from "../GenericFunctions";
 import { parseLineItemsFromJson } from "../utils/LineItems";
 import { formatToLexwareDate } from "../utils/date";
 
+function buildAddress(
+  contactId: string,
+  manualAddress: IDataObject
+): IDataObject | undefined {
+  if (contactId && contactId.trim()) {
+    return { contactId: contactId.trim() };
+  }
+  if (manualAddress && Object.keys(manualAddress).length > 0) {
+    const addr: IDataObject = {};
+    const fields: Array<keyof IDataObject> = [
+      "name",
+      "supplement",
+      "street",
+      "city",
+      "zip",
+      "countryCode",
+    ];
+    for (const f of fields) {
+      const v = manualAddress[f as string];
+      if (typeof v === "string" && v.trim()) {
+        addr[f as string] =
+          f === "countryCode" ? v.trim().toUpperCase() : v.trim();
+      }
+    }
+    if (addr.name) {
+      if (!addr.countryCode) addr.countryCode = "DE";
+      return addr;
+    }
+  }
+  return undefined;
+}
+
 function buildInvoiceBody(
   getParam: (name: string, index?: number, defaultValue?: unknown) => unknown,
   i: number
@@ -18,6 +50,9 @@ function buildInvoiceBody(
   const voucherDateRaw = (getParam("voucherDate", i, "") as string) || "";
   const voucherDate = formatToLexwareDate(voucherDateRaw);
   const contactId = (getParam("contactId", i, "") as string) || "";
+  const manualAddressRaw =
+    (getParam("manualAddress.address", i, {}) as IDataObject) || {};
+  const address = buildAddress(contactId, manualAddressRaw);
 
   const rawItems = (getParam("lineItems.item", i, []) as IDataObject[]) || [];
   const lineItems = Array.isArray(rawItems) ? rawItems.map((it) => {
@@ -56,7 +91,7 @@ function buildInvoiceBody(
     introduction: introduction || undefined,
     remark: remark || undefined,
     voucherDate,
-    address: contactId ? { contactId } : undefined,
+    address,
     lineItems,
   };
   const totalPriceVal = getParam("totalPrice.value", i, {}) as IDataObject;
