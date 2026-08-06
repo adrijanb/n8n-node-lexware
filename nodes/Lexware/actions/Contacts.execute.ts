@@ -383,35 +383,35 @@ export async function executeContacts(
       const page = this.getNodeParameter("page", i, 0) as number;
       const size = this.getNodeParameter("size", i, 25) as number;
       const returnAll = !!this.getNodeParameter("returnAll", i, false);
-      const filter_email = (
+      const filterEmail = (
         this.getNodeParameter("filter_email", i, "") as string
       ).trim();
-      const filter_name = (
+      const filterName = (
         this.getNodeParameter("filter_name", i, "") as string
       ).trim();
-      const filter_number = this.getNodeParameter(
+      const filterNumber = this.getNodeParameter(
         "filter_number",
         i,
         0
       ) as number;
-      const filter_customer = this.getNodeParameter(
+      const filterCustomer = this.getNodeParameter(
         "filter_customer",
         i,
         "ignore"
       ) as string;
-      const filter_vendor = this.getNodeParameter(
+      const filterVendor = this.getNodeParameter(
         "filter_vendor",
         i,
         "ignore"
       ) as string;
 
       const qs: IDataObject = { page, size };
-      if (filter_email.length >= 3) qs.filter_email = filter_email;
-      if (filter_name.length >= 3) qs.filter_name = filter_name;
-      if (filter_number && Number.isFinite(filter_number))
-        qs.filter_number = filter_number;
-      if (filter_customer !== "ignore") qs.filter_customer = filter_customer;
-      if (filter_vendor !== "ignore") qs.filter_vendor = filter_vendor;
+      if (filterEmail.length >= 3) qs.email = filterEmail;
+      if (filterName.length >= 3) qs.name = filterName;
+      if (filterNumber && Number.isFinite(filterNumber))
+        qs.number = filterNumber;
+      if (filterCustomer !== "ignore") qs.customer = filterCustomer === "true";
+      if (filterVendor !== "ignore") qs.vendor = filterVendor === "true";
 
       if (returnAll) {
         responseData = await lexwareApiRequestPagedAll.call(

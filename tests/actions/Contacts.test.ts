@@ -431,11 +431,11 @@ describe("Contacts.execute - Umfassende Tests", () => {
         {
           page: 0,
           size: 25,
-          filter_email: "test@example.com",
-          filter_name: "Mustermann",
-          filter_number: 12345,
-          filter_customer: "true",
-          filter_vendor: "false",
+          email: "test@example.com",
+          name: "Mustermann",
+          number: 12345,
+          customer: true,
+          vendor: false,
         }
       );
     });
