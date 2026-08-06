@@ -445,7 +445,6 @@ describe("GenericFunctions - Umfassende Tests", () => {
           Accept: "application/json",
           Authorization: "Bearer upload-token",
         },
-        json: true,
         formData,
       });
       expect(result).toBe(mockResponse);

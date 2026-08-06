@@ -151,6 +151,82 @@ describe("Invoices.execute - Umfassende Tests", () => {
       expect(result).toEqual([{ json: mockResponse }]);
     });
 
+    it("sollte eine manuelle Adresse bereinigen und statt einer leeren Kontakt-ID senden", async () => {
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
+        if (param === "contactId") return "   ";
+        if (param === "manualAddress.address") {
+          return {
+            name: "  Muster GmbH  ",
+            supplement: "  Buchhaltung  ",
+            street: "  Musterstraße 1  ",
+            city: "  Berlin  ",
+            zip: "  10115  ",
+            countryCode: "  de  ",
+          };
+        }
+        if (param === "lineItems.item") return [];
+        return param.includes(".") ? {} : "";
+      });
+
+      lexwareApiRequest.mockResolvedValue({ id: "manual-address-invoice" });
+
+      await executeInvoices.call(mockExecuteFunctions, 0, "create");
+
+      expect(lexwareApiRequest).toHaveBeenCalledWith(
+        "POST",
+        "/v1/invoices",
+        expect.objectContaining({
+          address: {
+            name: "Muster GmbH",
+            supplement: "Buchhaltung",
+            street: "Musterstraße 1",
+            city: "Berlin",
+            zip: "10115",
+            countryCode: "DE",
+          },
+        })
+      );
+    });
+
+    it("sollte eine Kontakt-ID gegenüber der manuellen Adresse bevorzugen", async () => {
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
+        if (param === "contactId") return "  contact-123  ";
+        if (param === "manualAddress.address") return { name: "Muster GmbH" };
+        if (param === "lineItems.item") return [];
+        return param.includes(".") ? {} : "";
+      });
+
+      lexwareApiRequest.mockResolvedValue({ id: "contact-invoice" });
+
+      await executeInvoices.call(mockExecuteFunctions, 0, "create");
+
+      expect(lexwareApiRequest).toHaveBeenCalledWith(
+        "POST",
+        "/v1/invoices",
+        expect.objectContaining({ address: { contactId: "contact-123" } })
+      );
+    });
+
+    it("sollte bei einer manuellen Adresse ohne Land DE ergänzen", async () => {
+      mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
+        if (param === "manualAddress.address") return { name: "Muster GmbH" };
+        if (param === "lineItems.item") return [];
+        return param.includes(".") ? {} : "";
+      });
+
+      lexwareApiRequest.mockResolvedValue({ id: "default-country-invoice" });
+
+      await executeInvoices.call(mockExecuteFunctions, 0, "create");
+
+      expect(lexwareApiRequest).toHaveBeenCalledWith(
+        "POST",
+        "/v1/invoices",
+        expect.objectContaining({
+          address: { name: "Muster GmbH", countryCode: "DE" },
+        })
+      );
+    });
+
     it("sollte mit finalize=true eine finalisierte Rechnung erstellen", async () => {
       // Arrange
       mockExecuteFunctions.getNodeParameter.mockImplementation((param: string) => {
@@ -586,22 +662,12 @@ describe("Invoices.execute - Umfassende Tests", () => {
     });
   });
 
-  describe("DELETE Operation", () => {
-    it("sollte eine Rechnung löschen", async () => {
-      // Arrange
-      const invoiceId = "invoice-delete";
-      mockExecuteFunctions.getNodeParameter.mockReturnValue(invoiceId);
-      lexwareApiRequest.mockResolvedValue({ success: true });
-
-      // Act
-      const result = await executeInvoices.call(mockExecuteFunctions, 0, "delete");
-
-      // Assert
-      expect(lexwareApiRequest).toHaveBeenCalledWith(
-        "DELETE",
-        `/v1/invoices/${invoiceId}`
-      );
-      expect(result).toEqual([{ json: { success: true } }]);
+  describe("Nicht unterstützte DELETE Operation", () => {
+    it("sollte einen Fehler werfen und keinen API-Aufruf ausführen", async () => {
+      await expect(
+        executeInvoices.call(mockExecuteFunctions, 0, "delete")
+      ).rejects.toThrow("Unsupported operation: delete");
+      expect(lexwareApiRequest).not.toHaveBeenCalled();
     });
   });
 
